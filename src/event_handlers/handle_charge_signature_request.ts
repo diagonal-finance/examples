@@ -37,6 +37,7 @@ const getChargeSignature = async (
     tokenAddress,
     amount,
     organizationContractAddress,
+    chargeData.nonce
   )
 
   return signature

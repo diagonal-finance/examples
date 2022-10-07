@@ -1,6 +1,5 @@
-import { ethers, providers } from 'ethers'
+import { BigNumber, ethers, providers } from 'ethers'
 import { getSigner } from './blockchain/common'
-import { getChargeNonce } from './blockchain/org_blockchain_data'
 import { computeEip712ChargeDigest } from './blockchain/org_digests'
 import {
   ChargeStruct as Charge,
@@ -14,7 +13,9 @@ export const signCharge = async (
   tokenAddress: string,
   amount: string,
   organizationAddress: string,
+  chargeNonce: number
 ) => {
+
   const chargeId = ethers.utils.id(originalChargeId)
   const charge: Charge = {
     id: chargeId,
@@ -23,23 +24,19 @@ export const signCharge = async (
     amount: amount,
   }
 
-  return sign(provider, charge, organizationAddress)
+  return sign(provider, charge, organizationAddress, chargeNonce)
 }
 
 const sign = async (
   provider: providers.JsonRpcProvider,
   charge: Charge,
   diagonalOrgAddr: string,
+  chargeNonce: number
 ): Promise<Signature> => {
-  const chargeNonce = await getChargeNonce(
-    provider,
-    charge.source as string,
-    diagonalOrgAddr,
-  )
   const chargeDigest = computeEip712ChargeDigest(
     charge,
     diagonalOrgAddr,
-    chargeNonce,
+    BigNumber.from(chargeNonce),
     provider.network.chainId,
   )
 

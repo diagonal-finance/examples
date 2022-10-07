@@ -22,11 +22,11 @@ export default envalid.cleanEnv(
     RPC_PROVIDER_URL: envalid.str({
       devDefault: 'https://eth-goerli.g.alchemy.com/v2/ALCHEMY_API_KEY',
     }),
-    SERVER_PORT: envalid.num({
-      devDefault: 8091,
-    }),
     ORG_CONTRACT_ADDRESS: envalid.str({
       devDefault: '0x...',
+    }),
+    DIAGONAL_SIGNATURE_HEADER_KEY: envalid.str({
+      devDefault: 'diagonal-signature',
     }),
   },
   {

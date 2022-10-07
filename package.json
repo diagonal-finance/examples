@@ -9,6 +9,8 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "handleWebhooks": "ts-node src/examples/1_handling_webhook_events.ts",
+    "createCheckoutSession": "ts-node src/examples/2_create_checkout_session.ts",
+    "createPortalSession": "ts-node src/examples/3_create_portal_session.ts",
     "format:check": "prettier --check 'src/**/*.{js,ts}'",
     "format:write": "prettier --write 'src/**/*.{js,ts}'",
     "lint": "eslint ./src/ --ext .ts",

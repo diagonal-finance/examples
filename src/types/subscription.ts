@@ -1,4 +1,4 @@
-import { ChainName, Token } from './blockchain'
+import { Token } from './blockchain'
 
 export enum RecurringInterval {
   MONTH = 'month',
@@ -42,7 +42,7 @@ export interface SubscriptionBillingData {
 export interface SubscriptionPaymentInformationData {
   address: string
   token: Token
-  chain: ChainName
+  chain: string
 }
 
 export interface SubscriptionData {

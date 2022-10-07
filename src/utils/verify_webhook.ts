@@ -32,7 +32,6 @@ const verifyPayload = (payload: unknown): void => {
 }
 
 const verifyEndpointSecret = (endpointSecret: string): void => {
-  console.log('endpointSecret length', endpointSecret.length)
   if (
     typeof endpointSecret !== 'string' ||
     endpointSecret === '' ||
