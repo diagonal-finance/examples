@@ -19,7 +19,7 @@ app.post(checkoutSessionEndpoint, async (_, res) => {
     let apiKey = environment.DIAGONAL_API_KEY as string
     let diagonalApiBaseUrl = environment.DIAGONAL_API_BASE_URL as string
 
-    const createChheckoutSession: ICreateCheckoutSession = {
+    const createCheckoutSession: ICreateCheckoutSession = {
         "cancel_url": "https://chainwire.net/cancel",
         "success_url": "https://chainwire.net/success",
         "optimistic_redirect": true,
@@ -37,7 +37,7 @@ app.post(checkoutSessionEndpoint, async (_, res) => {
           Accept: 'application/json',
           'x-api-key': apiKey,
         },
-        body: JSON.stringify(createChheckoutSession),
+        body: JSON.stringify(createCheckoutSession),
       })
 
       const responseBody = await response.json();
