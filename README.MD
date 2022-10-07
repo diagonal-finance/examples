@@ -8,12 +8,12 @@
 
 ### Usage:
 
-Take a look at some of the examples at the /examples directory, and run them.
+Take a look at some of the examples at the `src/examples` directory, and run them.
 
 
 #### 1. Handling webhook events
 
-Path: examples/1_handling_webhook_events.ts
+Path: `src/examples/1_handling_webhook_events.ts`
 
 This example deals with handling webhook events sent by the Diagonal backend. We show how we can handle Diagonal charge signature requests properly.
 
