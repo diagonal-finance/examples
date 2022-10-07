@@ -23,7 +23,7 @@ Path: `src/examples/2_create_checkout_session.ts`
 
 How to create a checkout session from your backend as a merchant.
 
-#### 3. Handling webhook events
+#### 3. Create portal session
 
 Path: `src/examples/3_create_portal_session.ts`
 
