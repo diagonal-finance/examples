@@ -8,9 +8,9 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "handleWebhooks": "ts-node src/examples/1_handling_webhook_events.ts",
-    "createCheckoutSession": "ts-node src/examples/2_create_checkout_session.ts",
-    "createPortalSession": "ts-node src/examples/3_create_portal_session.ts",
+    "handleWebhooks": "ts-node src/1_handling_webhook_events.ts",
+    "createCheckoutSession": "ts-node src/2_create_checkout_session.ts",
+    "handleSignatureRequest": "ts-node src/3_handling_signature_request",
     "format:check": "prettier --check 'src/**/*.{js,ts}'",
     "format:write": "prettier --write 'src/**/*.{js,ts}'",
     "lint": "eslint ./src/ --ext .ts",
@@ -22,9 +22,9 @@
     "cross-fetch": "^3.1.5",
     "dotenv": "^16.0.0",
     "envalid": "^7.3.1",
-    "ethers": "^5.6.6",
     "nodemon": "^2.0.16",
-    "node-fetch": "3.2.10"
+    "node-fetch": "3.2.10",
+    "@diagonal-finance/backend-sdk": "../backend-sdk"
   },
   "lint-staged": {
     "*.ts": [
@@ -32,14 +32,14 @@
       "eslint"
     ]
   },
-	"engines": {
-		"node": ">=16.16.0",
-		"npm": "8.11.0"
-	},
-	"volta": {
-		"node": "16.16.0",
-		"npm": "8.11.0"
-	},
+  "engines": {
+    "node": ">=16.16.0",
+    "npm": "8.11.0"
+  },
+  "volta": {
+    "node": "16.16.0",
+    "npm": "8.11.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^16.3.0",
     "@commitlint/config-conventional": "^16.2.4",
