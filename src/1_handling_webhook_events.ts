@@ -8,12 +8,12 @@ import {
 import express from 'express'
 
 const app = express()
-const endpointSecret = '78...b1'
 
 // Parse body into JSON
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   let payload = req.body
   let signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string
+  const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 
   let event: Event
 

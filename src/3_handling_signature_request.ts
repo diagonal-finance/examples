@@ -9,7 +9,6 @@ import {
 import express from 'express'
 
 const app = express()
-const endpointSecret = '78...b1'
 
 // Parse body into JSON
 app.post(
@@ -18,6 +17,8 @@ app.post(
   async (req, res) => {
     let payload = req.body
     let signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string
+    const endpointSecret = process.env
+      .DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 
     let event: Event
 
@@ -31,7 +32,7 @@ app.post(
       return res.sendStatus(200)
 
     const apiKey = process.env.DIAGONAL_API_KEY as string
-    const privateKey = process.env.DIAGONAL_API_KEY as string
+    const privateKey = process.env.DIAGONAL_PRIVATE_KEY as string
     const diagonal = new Diagonal(apiKey)
 
     const signature = event.data
