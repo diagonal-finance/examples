@@ -1,15 +1,15 @@
 import {
-  Webhooks,
+  Constants,
+  DiagonalError,
   Event,
   EventType,
-  Constants,
+  Webhooks,
 } from '@diagonal-finance/backend-sdk'
 
 import express from 'express'
 
 const app = express()
 
-// Parse body into JSON
 app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   let payload = req.body
   let signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string
@@ -20,6 +20,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   try {
     event = Webhooks.constructEvent(payload, signatureHeader, endpointSecret)
   } catch (e) {
+    if (e instanceof DiagonalError) {
+      // Obtain error information
+    }
     return res.sendStatus(400)
   }
 

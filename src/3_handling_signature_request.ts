@@ -4,13 +4,13 @@ import {
   EventType,
   Constants,
   Diagonal,
+  DiagonalError,
 } from '@diagonal-finance/backend-sdk'
 
 import express from 'express'
 
 const app = express()
 
-// Parse body into JSON
 app.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
@@ -25,6 +25,9 @@ app.post(
     try {
       event = Webhooks.constructEvent(payload, signatureHeader, endpointSecret)
     } catch (e) {
+      if (e instanceof DiagonalError) {
+        // Obtain error information
+      }
       return res.sendStatus(400)
     }
 
