@@ -32,7 +32,7 @@ app.post(
       return res.sendStatus(200)
 
     const apiKey = process.env.DIAGONAL_API_KEY as string
-    const privateKey = process.env.DIAGONAL_PRIVATE_KEY as string
+    const privateKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY as string
     const diagonal = new Diagonal(apiKey)
 
     const signature = event.data
