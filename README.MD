@@ -6,28 +6,26 @@
 2. `npm install`
 
 
-### Usage:
-
-Take a look at some of the examples at the `src/examples` directory, and run them.
+### Examples:
 
 
 #### 1. Handling webhook events
 
-Path: `src/examples/1_handling_webhook_events.ts`
+Path: `src/1_handling_webhook_events.ts`
 
-This example deals with handling webhook events sent by the Diagonal backend. We show how we can handle Diagonal charge signature requests properly.
+How to handle webhook events sent by the Diagonal backend properly.
 
 #### 2. Create checkout session
 
-Path: `src/examples/2_create_checkout_session.ts`
+Path: `src/2_create_checkout_session.ts`
 
-How to create a checkout session from your backend as a merchant.
+How to create a checkout session from your backend.
 
-#### 3. Create portal session
+#### 3. Handling charge signature requests
 
-Path: `src/examples/3_create_portal_session.ts`
+Path: `src/3_handling_signature_requests.ts`
 
-How to create a portal session from your backend as a merchant.
+How to handle charge signature requests.
 
 
 ---
