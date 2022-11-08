@@ -1,5 +1,5 @@
 import {
-  WebhookEvent,
+  Webhooks,
   Event,
   EventType,
   Constants,
@@ -18,7 +18,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   let event: Event
 
   try {
-    event = WebhookEvent.construct(payload, signatureHeader, endpointSecret)
+    event = Webhooks.constructEvent(payload, signatureHeader, endpointSecret)
   } catch (e) {
     return res.sendStatus(400)
   }
