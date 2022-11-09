@@ -5,7 +5,7 @@ import {
   Constants,
   Diagonal,
   DiagonalError,
-} from '@diagonal-finance/backend-sdk'
+} from '@diagonal-finance/sdk'
 
 import express from 'express'
 

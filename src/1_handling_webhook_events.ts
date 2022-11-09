@@ -4,7 +4,7 @@ import {
   Event,
   EventType,
   Webhooks,
-} from '@diagonal-finance/backend-sdk'
+} from '@diagonal-finance/sdk'
 
 import express from 'express'
 
@@ -39,8 +39,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
       // handleSubscriptionCreated(event);
       break
     default:
-      // Unexpected event type
       console.log(`Unhandled event type ${event.type}.`)
+      break
   }
 
   // Return a 200 response to acknowledge receipt of the event
