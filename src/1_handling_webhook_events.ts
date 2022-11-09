@@ -30,13 +30,13 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   switch (event.type) {
     case EventType.SIGNATURE_CHARGE_REQUEST:
       console.log(`Charge signature request`)
-      // Then define and call a method to handle the charge signature request
-      // handleChargeSignatureRequest(event);
+      // Handle the charge signature request here
+      // ...
       break
     case EventType.SUBSCRIPTION_CREATED:
       console.log(`Subscription was created`)
-      // Then define and call a method to handle the subscription created event
-      // handleSubscriptionCreated(event);
+      // Handle the subscription creation here
+      // ...
       break
     default:
       console.log(`Unhandled event type ${event.type}.`)

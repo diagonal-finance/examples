@@ -31,19 +31,31 @@ app.post(
       return res.sendStatus(400)
     }
 
-    if (event.type !== EventType.SIGNATURE_CHARGE_REQUEST)
-      return res.sendStatus(200)
+    // Handle the event
+    switch (event.type) {
+      case EventType.SIGNATURE_CHARGE_REQUEST: {
+        // Handle the charge signature request here
+        const apiKey = process.env.DIAGONAL_API_KEY as string
+        const privateKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY as string
+        const diagonal = new Diagonal(apiKey)
 
-    const apiKey = process.env.DIAGONAL_API_KEY as string
-    const privateKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY as string
-    const diagonal = new Diagonal(apiKey)
+        const signature = event.data
+        const charge = signature.data.charge
 
-    const signature = event.data
-    const charge = signature.data.charge
+        const ecdsaSignature = diagonal.signatures.sign(signature, privateKey)
 
-    const ecdsaSignature = diagonal.signatures.sign(signature, privateKey)
-
-    await diagonal.charges.capture(charge.id, ecdsaSignature)
+        await diagonal.charges.capture(charge.id, ecdsaSignature)
+        break
+      }
+      case EventType.SUBSCRIPTION_CREATED:
+        console.log(`Subscription was created`)
+        // Handle the subscription creation here
+        // ...
+        break
+      default:
+        console.log(`Unhandled event type ${event.type}.`)
+        break
+    }
 
     // Return a 200 response to acknowledge receipt of the event
     res.sendStatus(200)
