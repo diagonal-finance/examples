@@ -3,13 +3,14 @@ lockfileVersion: 5.4
 specifiers:
   '@commitlint/cli': ^16.3.0
   '@commitlint/config-conventional': ^16.2.4
-  '@diagonal-finance/sdk': ^2.0.0
+  '@diagonal-finance/sdk': ^2.0.1
   '@types/express': ^4.17.13
   '@types/node': ^17.0.23
   '@types/node-fetch': ^2.6.2
   '@typescript-eslint/eslint-plugin': ^5.23.0
   '@typescript-eslint/parser': ^5.23.0
   cross-fetch: ^3.1.5
+  dotenv: ^16.0.3
   eslint: ^8.15.0
   eslint-config-prettier: ^8.5.0
   eslint-config-standard: ^17.0.0
@@ -20,17 +21,18 @@ specifiers:
   express: ^4.18.1
   husky: ^8.0.1
   lint-staged: ^12.4.1
-  node-fetch: 3.2.10
+  node-fetch: '2.1'
   nodemon: ^2.0.16
   prettier: ^2.6.2
   ts-node: ^10.7.0
   typescript: ^4.6.4
 
 dependencies:
-  '@diagonal-finance/sdk': 2.0.0
+  '@diagonal-finance/sdk': 2.0.1
   cross-fetch: 3.1.5
+  dotenv: 16.0.3
   express: 4.18.1
-  node-fetch: 3.2.10
+  node-fetch: 2.1.2
   nodemon: 2.0.20
 
 devDependencies:
@@ -253,8 +255,8 @@ packages:
       '@ethersproject/signing-key': 5.7.0
     dev: false
 
-  /@diagonal-finance/sdk/2.0.0:
-    resolution: {integrity: sha512-/WkE+qHnoi5MbJ0sVAHdH3pDo1iIPnvotJiKeLFVuyl/xPV42aCEKQ06CRVMCNrkWNELsivFs5ArfgI0752Ovw==}
+  /@diagonal-finance/sdk/2.0.1:
+    resolution: {integrity: sha512-6zGLCwk4NrIt6DJuCLpRHTwRu5jEt8PP2xCGPpnPaV71vwrZMlDFr/WvdFtNY3zS+DfFywungrgUQerpV31DlA==}
     engines: {node: '>=18.12.1', npm: ^8.11.2}
     dependencies:
       '@diagonal-finance/crypto': 1.0.1
@@ -1201,11 +1203,6 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /data-uri-to-buffer/4.0.0:
-    resolution: {integrity: sha512-Vr3mLBA8qWmcuschSLAOogKgQ/Jwxulv3RNE4FXnYWRGujzrRWQI4m12fQqRkwX06C0KanhLr4hK+GydchZsaA==}
-    engines: {node: '>= 12'}
-    dev: false
-
   /debug/2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -1335,6 +1332,11 @@ packages:
     dependencies:
       is-obj: 2.0.0
     dev: true
+
+  /dotenv/16.0.3:
+    resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
+    engines: {node: '>=12'}
+    dev: false
 
   /eastasianwidth/0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -1810,14 +1812,6 @@ packages:
       reusify: 1.0.4
     dev: true
 
-  /fetch-blob/3.2.0:
-    resolution: {integrity: sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==}
-    engines: {node: ^12.20 || >= 14.13}
-    dependencies:
-      node-domexception: 1.0.0
-      web-streams-polyfill: 3.2.1
-    dev: false
-
   /file-entry-cache/6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -1900,13 +1894,6 @@ packages:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
-    dev: false
-
-  /formdata-polyfill/4.0.10:
-    resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
-    engines: {node: '>=12.20.0'}
-    dependencies:
-      fetch-blob: 3.2.0
     dev: false
 
   /forwarded/0.2.0:
@@ -2629,9 +2616,9 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /node-domexception/1.0.0:
-    resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
-    engines: {node: '>=10.5.0'}
+  /node-fetch/2.1.2:
+    resolution: {integrity: sha512-IHLHYskTc2arMYsHZH82PVX8CSKT5lzb7AXeyO06QnjGDKtkv+pv3mEki6S7reB/x1QPo+YPxQRNEVgR5V/w3Q==}
+    engines: {node: 4.x || >=6.0.0}
     dev: false
 
   /node-fetch/2.6.7:
@@ -2644,15 +2631,6 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
-    dev: false
-
-  /node-fetch/3.2.10:
-    resolution: {integrity: sha512-MhuzNwdURnZ1Cp4XTazr69K0BTizsBroX7Zx3UgDSVcZYKF/6p0CBe4EUb/hLqmzVhl0UpYfgRljQ4yxE+iCxA==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dependencies:
-      data-uri-to-buffer: 4.0.0
-      fetch-blob: 3.2.0
-      formdata-polyfill: 4.0.10
     dev: false
 
   /nodemon/2.0.20:
@@ -3537,11 +3515,6 @@ packages:
   /vary/1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
-    dev: false
-
-  /web-streams-polyfill/3.2.1:
-    resolution: {integrity: sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==}
-    engines: {node: '>= 8'}
     dev: false
 
   /webidl-conversions/3.0.1:
