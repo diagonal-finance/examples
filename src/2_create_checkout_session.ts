@@ -14,10 +14,9 @@ let diagonalApiBaseUrl = process.env.DIAGONAL_API_BASE_URL as string
 
 app.post('/create-checkout-session', async (_: Request, res: Response) => {
   const createCheckoutSession = {
-    cancel_url: 'https://chainwire.net/cancel',
-    success_url: 'https://chainwire.net/success',
-    optimistic_redirect: true,
-    amount: '1',
+    cancel_url: 'https://example.com/cancel',
+    success_url: 'https://example.com/cancel',
+    amount: '10',
     subscription: {
       interval: 'month',
       interval_count: 1,
