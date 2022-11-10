@@ -36,7 +36,8 @@ app.post('/webhook', (req: Request, res: Response) => {
     case EventType.SIGNATURE_CHARGE_REQUEST:
       console.log(`Charge signature request`)
       // Handle the charge signature request here
-      // ...
+      // View an example handler:
+      // https://docs.diagonal.finance/recipes/sign-and-capture-charge
       break
     case EventType.SUBSCRIPTION_CREATED:
       console.log(`Subscription was created`)
