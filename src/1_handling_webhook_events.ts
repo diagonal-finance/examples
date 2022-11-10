@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv'
+import express, { Request, Response } from 'express'
 import {
   Constants,
   DiagonalError,
@@ -6,14 +8,18 @@ import {
   Webhooks,
 } from '@diagonal-finance/sdk'
 
-import express from 'express'
+dotenv.config()
 
 const app = express()
 
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+app.use(express.json()) // to support JSON-encoded bodies
+app.use(express.urlencoded()) // to support URL-encoded bodies
+
+const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
+
+app.post('/webhook', (req: Request, res: Response) => {
   let payload = req.body
   let signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string
-  const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 
   let event: Event
 
@@ -26,12 +32,12 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     return res.sendStatus(400)
   }
 
-  // Handle the event
   switch (event.type) {
     case EventType.SIGNATURE_CHARGE_REQUEST:
       console.log(`Charge signature request`)
       // Handle the charge signature request here
-      // ...
+      // View an example handler:
+      // https://docs.diagonal.finance/recipes/sign-and-capture-charge
       break
     case EventType.SUBSCRIPTION_CREATED:
       console.log(`Subscription was created`)
@@ -39,12 +45,15 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
       // ...
       break
     default:
+      // Unexpected event type
       console.log(`Unhandled event type ${event.type}.`)
-      break
   }
 
-  // Return a 200 response to acknowledge receipt of the event
+  // Return a 200 response to acknowledge handling of the event
   res.sendStatus(200)
 })
 
-app.listen(3000, () => console.log('Running on port 3000'))
+// start the express server
+app.listen(3000, () => {
+  console.log(`server started at http://localhost:3000`)
+})
