@@ -1,33 +1,17 @@
-# Backend merchant examples
+# Diagonal backend examples
 
-### Setup:
+In this repository you can find language specific examples for interaction with the Diagonal backend.
 
-1. Copy .env.example to .env and add populate the environment variables accordingly
-2. `npm install`
+For more details visit: https://docs.diagonal.finance/ 
 
+## `.env` config
 
-### Examples:
+Simply copy the `.env.example` file into `.env`, and then populate it with the appropriate values.
 
+Description:
 
-#### 1. Handling webhook events
+`DIAGONAL_API_KEY` - Key necessary for making authorized requests to the Diagonal backend. Initailly will be provided by the Diagonal team. You can learn more about how to get Diagonal API key [here](https://docs.diagonal.finance/docs/quickstart-setup#step-1-create-your-signer-key-pair).
 
-Path: `src/1_handling_webhook_events.ts`
+`DIAGONAL_SIGNING_PRIVATE_KEY` - Ethereum private key for signing incoming charge requests from the diagonal backend. To get more details, as well as learn how to create such key, please visit this [link](https://docs.diagonal.finance/docs/quickstart-setup#step-1-create-your-signer-key-pair).
 
-How to handle webhook events sent by the Diagonal backend properly.
-
-#### 2. Create checkout session
-
-Path: `src/2_create_checkout_session.ts`
-
-How to create a checkout session from your backend.
-
-#### 3. Handling charge signature requests
-
-Path: `src/3_handling_signature_requests.ts`
-
-How to handle charge signature requests.
-
-
----
-
-More examples will be added in the future.
+`DIAGONAL_WEBHOOK_ENDPOINT_SECRET` - Webhook endpoint secret key. You can obtain this key when creating a [webhook configuration](https://docs.diagonal.finance/docs/webhooks#configuration).

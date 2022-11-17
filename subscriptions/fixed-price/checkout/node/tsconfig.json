@@ -7,7 +7,7 @@
       "outDir": "./dist",
       "moduleResolution": "node",
       "typeRoots": ["node_modules/@types"],
-  
+      "baseUrl": ".",
       "removeComments": true,
       "noImplicitAny": true,
       "esModuleInterop": true,

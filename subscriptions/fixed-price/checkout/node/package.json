@@ -1,26 +1,25 @@
 {
-  "name": "diagonal-merchant-examples",
+  "name": "diagonal-backend-examples",
   "version": "1.0.0",
-  "description": "Repository containing example typescript scripts for interacting with the Diagonal backend, for merchants.",
-  "main": "index.js",
+  "description": "Repository containing diagonal backend integration examples",
+  "main": "./src/server.ts",
   "author": "Diagonal Finance",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "handleWebhooks": "ts-node src/1_handling_webhook_events.ts",
-    "createCheckoutSession": "ts-node src/2_create_checkout_session.ts",
-    "handleSignatureRequest": "ts-node src/3_handling_signature_request",
+    "start-ts": "ts-node src/server.ts",
+    "start": "node src/server.js",
     "format:check": "prettier --check 'src/**/*.{js,ts}'",
     "format:write": "prettier --write 'src/**/*.{js,ts}'",
     "lint": "eslint ./src/ --ext .ts",
-    "lint-check": "npm run format:check && npm run lint",
-    "prepare": "husky install"
+    "lint-check": "npm run format:check && npm run lint"
   },
   "dependencies": {
-    "@diagonal-finance/sdk": "../backend-sdk",
+    "@diagonal-finance/sdk": "../../../../../backend-sdk",
     "cross-fetch": "^3.1.5",
     "dotenv": "^16.0.3",
+    "envalid": "^7.3.1",
     "express": "^4.18.1",
     "node-fetch": "2.1",
     "nodemon": "^2.0.16"
@@ -54,7 +53,6 @@
     "eslint-plugin-jest": "^26.1.5",
     "eslint-plugin-n": "^15.2.0",
     "eslint-plugin-promise": "^6.0.0",
-    "husky": "^8.0.1",
     "lint-staged": "^12.4.1",
     "prettier": "^2.6.2",
     "ts-node": "^10.7.0",
