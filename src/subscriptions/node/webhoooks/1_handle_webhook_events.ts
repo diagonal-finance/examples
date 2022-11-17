@@ -72,7 +72,6 @@ app.post('/webhook', (req: Request, res: Response) => {
       // Handle the charge attempt failed event here
       // ...
       break
-
     case EventType.SUBSCRIPTION_CREATED:
       console.log(`Subscription was created`)
       // Handle the subscription created event here
