@@ -6,40 +6,25 @@ import {
   Event,
   EventType,
   Diagonal,
-  CreateCheckoutSession,
+  CheckoutSessionCreateParams,
   RecurringInterval,
-  CreateCustomer,
-  UpdateSubscription,
-  CancelSubscription,
-  UpdateCharge,
-  UpdateCustomer,
+  CustomerCreateParams,
+  SubscriptionUpdateParams,
+  SubscriptionCancelParams,
+  ChargeUpdateParams,
+  CustomerUpdateParams,
 } from '@diagonal-finance/sdk'
 
 dotenv.config()
 
-if (
-  !process.env.DIAGONAL_API_KEY ||
-  !process.env.DIAGONAL_SIGNING_PRIVATE_KEY ||
-  !process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
-) {
-  console.log(
+const isEnvConfigured =
+  process.env.DIAGONAL_API_KEY &&
+  process.env.DIAGONAL_SIGNING_PRIVATE_KEY &&
+  process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
+if (!isEnvConfigured)
+  throw new Error(
     'The .env file is not configured. Follow the instructions in the root folder readme to configure the .env file.',
   )
-  console.log('')
-  process.env.DIAGONAL_API_KEY
-    ? ''
-    : console.log('Add DIAGONAL_API_KEY to your .env file.')
-
-  process.env.DIAGONAL_SIGNING_PRIVATE_KEY
-    ? ''
-    : console.log('Add DIAGONAL_SIGNING_PRIVATE_KEY to your .env file.')
-
-  process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
-    ? ''
-    : console.log('Add DIAGONAL_WEBHOOK_ENDPOINT_SECRET to your .env file.')
-
-  process.exit()
-}
 
 const app = express()
 
@@ -55,7 +40,7 @@ const diagonal = new Diagonal(apiKey)
 // Checkout sessions
 
 app.post('/create-checkout-session', async (req: Request, res: Response) => {
-  const input: CreateCheckoutSession = {
+  const input: CheckoutSessionCreateParams = {
     cancel_url: 'https://chainwire.net/cancel',
     success_url: 'https://chainwire.net/success',
     amount: '10',
@@ -103,7 +88,7 @@ app.get('/get-subscription/:id', async (req: Request, res: Response) => {
 app.put('/update-subscription/:id', async (req: Request, res: Response) => {
   const subscriptionId = req.params.id
 
-  const input: UpdateSubscription = {
+  const input: SubscriptionUpdateParams = {
     billing_amount: req.body.billing_amount,
     billing_interval: req.body.billing_interval,
     billing_interval_count: req.body.billing_interval_count,
@@ -123,7 +108,7 @@ app.put('/update-subscription/:id', async (req: Request, res: Response) => {
 app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
   const subscriptionId = req.params.id
 
-  const input: CancelSubscription = {
+  const input: SubscriptionCancelParams = {
     charge_behaviour: req.body.charge_behaviour,
     end_of_period: req.body.end_of_period,
   }
@@ -147,7 +132,7 @@ app.post('/get-charge/:id', async (req: Request, res: Response) => {
 app.put('/update-charge/:id', async (req: Request, res: Response) => {
   const chargeId = req.params.id
 
-  const input: UpdateCharge = {
+  const input: ChargeUpdateParams = {
     name: req.body.name,
     description: req.body.description,
     reference: req.body.reference,
@@ -161,7 +146,7 @@ app.put('/update-charge/:id', async (req: Request, res: Response) => {
 // Customers
 
 app.post('/create-customer', async (req: Request, res: Response) => {
-  const input: CreateCustomer = {
+  const input: CustomerCreateParams = {
     email: req.body.email,
     name: req.body.name,
   }
@@ -173,7 +158,7 @@ app.post('/create-customer', async (req: Request, res: Response) => {
 app.post('/update-customer/:id', async (req: Request, res: Response) => {
   const customerId = req.params.id
 
-  const input: UpdateCustomer = {
+  const input: CustomerUpdateParams = {
     email: req.body.email,
     name: req.body.name,
   }

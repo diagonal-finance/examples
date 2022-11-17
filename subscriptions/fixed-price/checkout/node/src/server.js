@@ -10,29 +10,14 @@ const {
 
 dotenv.config()
 
-if (
-  !process.env.DIAGONAL_API_KEY ||
-  !process.env.DIAGONAL_SIGNING_PRIVATE_KEY ||
-  !process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
-) {
-  console.log(
+const isEnvConfigured =
+  process.env.DIAGONAL_API_KEY &&
+  process.env.DIAGONAL_SIGNING_PRIVATE_KEY &&
+  process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
+if (!isEnvConfigured)
+  throw new Error(
     'The .env file is not configured. Follow the instructions in the root folder readme to configure the .env file.',
   )
-  console.log('')
-  process.env.DIAGONAL_API_KEY
-    ? ''
-    : console.log('Add DIAGONAL_API_KEY to your .env file.')
-
-  process.env.DIAGONAL_SIGNING_PRIVATE_KEY
-    ? ''
-    : console.log('Add DIAGONAL_SIGNING_PRIVATE_KEY to your .env file.')
-
-  process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
-    ? ''
-    : console.log('Add DIAGONAL_WEBHOOK_ENDPOINT_SECRET to your .env file.')
-
-  process.exit()
-}
 
 const app = express()
 
