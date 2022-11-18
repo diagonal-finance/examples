@@ -1,12 +1,6 @@
 const dotenv = require('dotenv')
 const express = require('express')
-const {
-  Constants,
-  DiagonalError,
-  EventType,
-  Diagonal,
-  RecurringInterval,
-} = require('@diagonal-finance/sdk')
+const { Constants, DiagonalError, Diagonal } = require('@diagonal-finance/sdk')
 
 dotenv.config()
 
@@ -31,61 +25,42 @@ const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
 const diagonal = new Diagonal(apiKey)
 
 // Checkout sessions
+app.post('/create-checkout-session/:customerId', async (req, res) => {
+  const customerId = req.params.customerId
 
-app.post('/create-checkout-session', async (req, res) => {
+  let customer = await diagonal.customers.get(customerId)
+  if (!customer) {
+    // You can provide any customer data you want here
+    // Obtained through your own customer database or from the request
+    customer = await diagonal.customers.create()
+  }
+
   const input = {
     cancel_url: 'https://chainwire.net/cancel',
     success_url: 'https://chainwire.net/success',
     amount: '10',
     subscription: {
-      interval: RecurringInterval.MONTH,
+      interval: 'month',
       interval_count: 1,
     },
-    customer_id: req.body.customer_id, // the customer field is optional, but you can use it to link a customer to the checkout session
+    customer_id: customer.id, // the customer field is optional, but you can use it to link a customer to the checkout session
   }
 
   const checkoutSession = await diagonal.checkout.sessions.create(input)
 
-  res.send({
-    url: checkoutSession.url,
-  })
-})
-
-app.post('/expire-checkout-session/:id', async (req, res) => {
-  const checkoutSessionId = req.params.id
-  const expiredCheckoutSession = await diagonal.checkout.sessions.expire(
-    checkoutSessionId,
-  )
-  res.send(expiredCheckoutSession)
-})
-
-app.post('/get-checkout-session/:id', async (req, res) => {
-  const checkoutSessionId = req.params.id
-  const checkoutSession = await diagonal.checkout.sessions.get(
-    checkoutSessionId,
-  )
-  res.send(checkoutSession)
+  res.redirect(checkoutSession.url)
 })
 
 // Subscriptions
-
-app.get('/get-subscription/:id', async (req, res) => {
-  const subscriptionId = req.params.id
-  const subscription = await diagonal.subscriptions.get(subscriptionId)
-  res.send(subscription)
-})
-
-app.put('/update-subscription/:id', async (req, res) => {
+app.put('/upgrade-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
   const input = {
-    billing_amount: req.body.billing_amount,
-    billing_interval: req.body.billing_interval,
-    billing_interval_count: req.body.billing_interval_count,
-    charge_behaviour: req.body.charge_behaviour,
-    prorate: req.body.prorate,
-    metadata: req.body.metadata,
-    reference: req.body.reference,
+    billing_amount: '20',
+    billing_interval: 'month',
+    billing_interval_count: 1,
+    charge_behaviour: 'immediate',
+    prorate: true,
   }
 
   const updatedSubscription = await diagonal.subscriptions.update(
@@ -99,8 +74,8 @@ app.post('/cancel-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
   const input = {
-    charge_behaviour: req.body.charge_behaviour,
-    end_of_period: req.body.end_of_period,
+    charge_behaviour: 'immediate',
+    end_of_period: true,
   }
 
   const canceledSubscription = await diagonal.subscriptions.cancel(
@@ -111,66 +86,7 @@ app.post('/cancel-subscription/:id', async (req, res) => {
   res.send(canceledSubscription)
 })
 
-// Charges
-
-app.post('/get-charge/:id', async (req, res) => {
-  const chargeId = req.params.id
-  const charge = await diagonal.charges.get(chargeId)
-  res.send(charge)
-})
-
-app.put('/update-charge/:id', async (req, res) => {
-  const chargeId = req.params.id
-
-  const input = {
-    name: req.body.name,
-    description: req.body.description,
-    reference: req.body.reference,
-    metadata: req.body.metadata,
-  }
-
-  const charge = await diagonal.charges.update(chargeId, input)
-  res.send(charge)
-})
-
-// Customers
-
-app.post('/create-customer', async (req, res) => {
-  const input = {
-    email: req.body.email,
-    name: req.body.name,
-  }
-
-  const customer = await diagonal.customers.create(input)
-  res.send(customer)
-})
-
-app.post('/update-customer/:id', async (req, res) => {
-  const customerId = req.params.id
-
-  const input = {
-    email: req.body.email,
-    name: req.body.name,
-  }
-
-  const updatedCustomer = await diagonal.customers.update(customerId, input)
-  res.send(updatedCustomer)
-})
-
-app.get('/get-customer/:id', async (req, res) => {
-  const customerId = req.params.id
-  const customer = await diagonal.customers.get(customerId)
-  res.send(customer)
-})
-
-app.delete('/delete-customer/:id', async (req, res) => {
-  const customerId = req.params.id
-  await diagonal.customers.delete(customerId)
-  res.send(200)
-})
-
 // Webhook handling
-
 app.post('/webhook', async (req, res) => {
   const payload = req.body
   const signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY]
@@ -192,70 +108,70 @@ app.post('/webhook', async (req, res) => {
 
   // Handle the event
   switch (event.type) {
-    case EventType.SIGNATURE_CHARGE_REQUEST:
-      console.log(`Charge signature request`)
+    case 'signature.charge.request':
+      {
+        console.log(`Charge signature request`)
 
-      // Handle the charge signature request event here
-      const signatureRequest = event.data
-      const charge = signatureRequest.data.charge
+        // Handle the charge signature request event here
+        const signatureRequest = event.data
+        const charge = signatureRequest.data.charge
 
-      const ecdsaSignature = diagonal.signatures.sign(
-        signatureRequest,
-        signingKey,
-      )
+        const ecdsaSignature = diagonal.signatures.sign(
+          signatureRequest,
+          signingKey,
+        )
 
-      try {
-        await diagonal.charges.capture(charge.id, ecdsaSignature)
-        // charge has been captured successfully
-      } catch (e) {
-        if (e instanceof DiagonalError) {
-          // Obtain error information
+        try {
+          await diagonal.charges.capture(charge.id, ecdsaSignature)
+          // charge has been captured successfully
+        } catch (e) {
+          if (e instanceof DiagonalError) {
+            // Obtain error information
+          }
         }
       }
-
       break
-
-    case EventType.CHARGE_CREATED:
+    case 'charge.created':
       console.log(`Charge created`)
       // Handle the charge created event here
       // ...
       break
-    case EventType.CHARGE_CONFIRMED:
+    case 'charge.confirmed':
       console.log(`Charge confirmed`)
       // Handle the charge confirmed event here
       // ...
       break
-    case EventType.CHARGE_FINALIZED:
+    case 'charge.finalized':
       console.log(`Charge finalized`)
       // Handle the charge finalized here
       // ...
       break
-    case EventType.CHARGE_FAILED:
+    case 'charge.failed':
       console.log(`Charge failed`)
       // Handle the charge failed event here
       // ...
       break
-    case EventType.CHARGE_ATTEMPT_FAILED:
+    case 'charge.attempt_failed':
       console.log(`Charge attempt failed`)
       // Handle the charge attempt failed event here
       // ...
       break
-    case EventType.SUBSCRIPTION_CREATED:
+    case 'subscription.created':
       console.log(`Subscription was created`)
       // Handle the subscription created event here
       // ...
       break
-    case EventType.SUBSCRIPTION_ACTIVE:
+    case 'subscription.active':
       console.log(`Subscription was activated`)
       // Handle the subscription active event here
       // ...
       break
-    case EventType.SUBSCRIPTION_UPDATED:
+    case 'subscription.updated':
       console.log(`Subscription was updated`)
       // Handle the subscription updated event here
       // ...
       break
-    case EventType.SUBSCRIPTION_CANCELED:
+    case 'subscription.canceled':
       console.log(`Subscription was canceled`)
       // Handle the subscription canceling event here
       // ...
