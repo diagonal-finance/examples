@@ -47,8 +47,8 @@ app.post(
     }
 
     const input: CheckoutSessionCreateParams = {
-      cancel_url: 'https://chainwire.net/cancel',
-      success_url: 'https://chainwire.net/success',
+      cancel_url: 'https://example.com/cancel',
+      success_url: 'https://example.com/success',
       amount: '10',
       subscription: {
         interval: 'month',
