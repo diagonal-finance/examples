@@ -41,6 +41,8 @@ app.post(
     // retrieve the customer's subscriptions later.
     let customer = await diagonal.customers.get(req.params.customerId)
     if (!customer) {
+      // You can provide any customer data you want here
+      // Obtained through your own customer database or from the request
       customer = await diagonal.customers.create()
     }
 
@@ -52,7 +54,7 @@ app.post(
         interval: 'month',
         interval_count: 1,
       },
-      customer_id: customer.id, // the customer field is optional, but you can use it to link a customer to the checkout session
+      customer_id: customer.id,
     }
 
     const checkoutSession = await diagonal.checkout.sessions.create(input)
@@ -86,8 +88,8 @@ app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
   const subscriptionId = req.params.id
 
   // You can cancel a subscription immediately or at the end of the current billing period.
-  // In this example, we follow the recommended approach and cancel the subscription at the end of the billing period.
-  // While charging any outstanding amount immediately.
+  // In this example, we follow the recommended approach and cancel the subscription at the end of the billing period,
+  // while charging any outstanding amount immediately.
   const input: SubscriptionCancelParams = {
     charge_behaviour: 'immediate',
     end_of_period: true,
@@ -102,7 +104,6 @@ app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
 })
 
 // Webhook handling
-
 app.post('/webhook', async (req: Request, res: Response) => {
   const payload = req.body
   const signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string

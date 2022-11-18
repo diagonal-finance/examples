@@ -26,8 +26,10 @@ const diagonal = new Diagonal(apiKey)
 
 // Checkout sessions
 app.post('/create-checkout-session/:customerId', async (req, res) => {
+  // While creating a checkout session, you can pass in a customer ID
+  // to associate the session with a customer. This will allow you to
+  // retrieve the customer's subscriptions later.
   const customerId = req.params.customerId
-
   let customer = await diagonal.customers.get(customerId)
   if (!customer) {
     // You can provide any customer data you want here
@@ -43,7 +45,7 @@ app.post('/create-checkout-session/:customerId', async (req, res) => {
       interval: 'month',
       interval_count: 1,
     },
-    customer_id: customer.id, // the customer field is optional, but you can use it to link a customer to the checkout session
+    customer_id: customer.id,
   }
 
   const checkoutSession = await diagonal.checkout.sessions.create(input)
@@ -55,6 +57,8 @@ app.post('/create-checkout-session/:customerId', async (req, res) => {
 app.put('/upgrade-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
+  // You can upgrade a subscription by updating the subscription's amount
+  // and interval. The subscription will be updated immediately.
   const input = {
     billing_amount: '20',
     billing_interval: 'month',
@@ -73,6 +77,9 @@ app.put('/upgrade-subscription/:id', async (req, res) => {
 app.post('/cancel-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
+  // You can cancel a subscription immediately or at the end of the current billing period.
+  // In this example, we follow the recommended approach and cancel the subscription at the end of the billing period,
+  // while charging any outstanding amount immediately.
   const input = {
     charge_behaviour: 'immediate',
     end_of_period: true,
