@@ -67,11 +67,9 @@ app.put('/upgrade-subscription/:id', async (req, res) => {
     prorate: true,
   }
 
-  const updatedSubscription = await diagonal.subscriptions.update(
-    subscriptionId,
-    input,
-  )
-  res.send(updatedSubscription)
+  await diagonal.subscriptions.update(subscriptionId, input)
+
+  res.sendStatus(200)
 })
 
 app.post('/cancel-subscription/:id', async (req, res) => {
@@ -85,12 +83,9 @@ app.post('/cancel-subscription/:id', async (req, res) => {
     end_of_period: true,
   }
 
-  const canceledSubscription = await diagonal.subscriptions.cancel(
-    subscriptionId,
-    input,
-  )
+  await diagonal.subscriptions.cancel(subscriptionId, input)
 
-  res.send(canceledSubscription)
+  res.sendStatus(200)
 })
 
 // Webhook handling
