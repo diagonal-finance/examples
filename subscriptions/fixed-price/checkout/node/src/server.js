@@ -1,6 +1,6 @@
 const dotenv = require('dotenv')
 const express = require('express')
-const { Constants, DiagonalError, Diagonal } = require('@diagonal-finance/sdk')
+const { Constants, DiagonalError, Diagonal } = require('diagonal')
 
 dotenv.config()
 

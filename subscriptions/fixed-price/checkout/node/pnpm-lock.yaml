@@ -3,11 +3,11 @@ lockfileVersion: 5.4
 specifiers:
   '@commitlint/cli': ^16.3.0
   '@commitlint/config-conventional': ^16.2.4
-  '@diagonal-finance/sdk': ^2.0.3
   '@types/express': ^4.17.13
   '@types/node': ^17.0.23
   '@typescript-eslint/eslint-plugin': ^5.23.0
   '@typescript-eslint/parser': ^5.23.0
+  diagonal: ^0.0.2
   dotenv: ^16.0.3
   eslint: ^8.15.0
   eslint-config-prettier: ^8.5.0
@@ -24,7 +24,7 @@ specifiers:
   typescript: ^4.6.4
 
 dependencies:
-  '@diagonal-finance/sdk': 2.0.3
+  diagonal: 0.0.2
   dotenv: 16.0.3
   express: 4.18.2
   nodemon: 2.0.20
@@ -245,19 +245,6 @@ packages:
       '@ethersproject/hash': 5.7.0
       '@ethersproject/keccak256': 5.7.0
       '@ethersproject/signing-key': 5.7.0
-    dev: false
-
-  /@diagonal-finance/sdk/2.0.3:
-    resolution: {integrity: sha512-Z1K+MGfMjrCY7NEKj00MEwVF6QY59n1WaeYpwke9dKBl1hob9tBOpUHvOSi533K7D47aEG5iaXe78JPDWt/s+Q==}
-    engines: {node: '>=18.12.1', npm: ^8.11.2}
-    dependencies:
-      '@diagonal-finance/crypto': 1.0.1
-      '@ethersproject/units': 5.7.0
-      axios: 1.1.3
-      form-data: 4.0.0
-      zod: 3.19.1
-    transitivePeerDependencies:
-      - debug
     dev: false
 
   /@eslint/eslintrc/1.3.3:
@@ -1285,6 +1272,19 @@ packages:
   /destroy/1.2.0:
     resolution: {integrity: sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
+    dev: false
+
+  /diagonal/0.0.2:
+    resolution: {integrity: sha512-sbRTwo0mfWU67lnVMpfRscID09tiOeN7A62hPzJJJ4/yTbhv4HqPSYx6YOfcrDo+wBhHiOGpLQZ0znlNAEqHzw==}
+    engines: {node: '>=18.12.1', npm: ^8.11.2}
+    dependencies:
+      '@diagonal-finance/crypto': 1.0.1
+      '@ethersproject/units': 5.7.0
+      axios: 1.1.3
+      form-data: 4.0.0
+      zod: 3.19.1
+    transitivePeerDependencies:
+      - debug
     dev: false
 
   /diff/4.0.2:
