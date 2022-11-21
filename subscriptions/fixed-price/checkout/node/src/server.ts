@@ -6,7 +6,7 @@ import {
   Event,
   SubscriptionCancelParams,
   SubscriptionUpdateParams,
-} from '@diagonal-finance/sdk'
+} from 'diagonal'
 import * as dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
 
