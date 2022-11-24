@@ -33,18 +33,18 @@ const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 
 const diagonal = new Diagonal(apiKey)
 
-// Create customer
-app.post('/create-account', async (req, res) => {
+// Create an account for your customer
+app.post('/create-account/', async (req: Request, res: Response) => {
   const email = req.body.email
   const name = req.body.name
 
   // step 1: create diagonal customer
   const customer = await diagonal.customers.create({
     email,
+    name,
   })
 
-  // step 2: create a user in your database, store customer id along side it
-  // createUser({email: email, name: name, diagonal_customer_id: customer.id})
+  // step 2: create a user in your database, store Diagonal customer id along side it
 
   res.sendStatus(200)
 })
@@ -55,17 +55,6 @@ app.post('/create-checkout-session/', async (req: Request, res: Response) => {
   // to associate the session with a customer. This will allow you to
   // retrieve the customer's subscriptions later.
   let customerId = req.body.customerId
-
-  if (!customerId) {
-    // You can provide any customer data you want here
-    // Obtained through your own customer database or from the request
-    // 1: read email from DB or body
-    const email = ''
-
-    // 2: create customer
-    const customer = await diagonal.customers.create({ email })
-    customerId = customer.id
-  }
 
   const input: CheckoutSessionCreateParams = {
     cancel_url: 'https://example.com/cancel',
@@ -84,7 +73,7 @@ app.post('/create-checkout-session/', async (req: Request, res: Response) => {
 })
 
 // Subscriptions
-app.put('/upgrade-subscription/:id', async (req: Request, res: Response) => {
+app.post('/upgrade-subscription/:id', async (req: Request, res: Response) => {
   const subscriptionId = req.params.id
 
   // You can upgrade a subscription by updating the subscription's amount
@@ -101,7 +90,8 @@ app.put('/upgrade-subscription/:id', async (req: Request, res: Response) => {
     subscriptionId,
     input,
   )
-  res.send(updatedSubscription)
+
+  res.sendStatus(200)
 })
 
 app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
@@ -120,7 +110,7 @@ app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
     input,
   )
 
-  res.send(canceledSubscription)
+  res.sendStatus(200)
 })
 
 // Webhook handling

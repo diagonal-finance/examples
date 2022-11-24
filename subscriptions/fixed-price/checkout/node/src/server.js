@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const dotenv = require('dotenv')
 const express = require('express')
 const { Constants, DiagonalError, Diagonal } = require('diagonal')
@@ -24,18 +25,28 @@ const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
 
 const diagonal = new Diagonal(apiKey)
 
+// Create an account for your customer
+app.post('/create-account/', async (req, res) => {
+  const email = req.body.email
+  const name = req.body.name
+
+  // step 1: create diagonal customer
+  const customer = await diagonal.customers.create({
+    email,
+    name,
+  })
+
+  // step 2: create a user in your database, store Diagonal customer id along side it
+
+  res.sendStatus(200)
+})
+
 // Checkout sessions
-app.post('/create-checkout-session/:customerId', async (req, res) => {
+app.post('/create-checkout-session/', async (req, res) => {
   // While creating a checkout session, you can pass in a customer ID
   // to associate the session with a customer. This will allow you to
   // retrieve the customer's subscriptions later.
   const customerId = req.params.customerId
-  let customer = await diagonal.customers.get(customerId)
-  if (!customer) {
-    // You can provide any customer data you want here
-    // Obtained through your own customer database or from the request
-    customer = await diagonal.customers.create()
-  }
 
   const input = {
     cancel_url: 'https://example.com/cancel',
@@ -45,7 +56,7 @@ app.post('/create-checkout-session/:customerId', async (req, res) => {
       interval: 'month',
       interval_count: 1,
     },
-    customer_id: customer.id,
+    customer_id: customerId,
   }
 
   const checkoutSession = await diagonal.checkout.sessions.create(input)
@@ -71,7 +82,8 @@ app.put('/upgrade-subscription/:id', async (req, res) => {
     subscriptionId,
     input,
   )
-  res.send(updatedSubscription)
+
+  res.sendStatus(200)
 })
 
 app.post('/cancel-subscription/:id', async (req, res) => {
@@ -90,7 +102,7 @@ app.post('/cancel-subscription/:id', async (req, res) => {
     input,
   )
 
-  res.send(canceledSubscription)
+  res.sendStatus(200)
 })
 
 // Webhook handling
