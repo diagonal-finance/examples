@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   CheckoutSessionCreateParams,
   Constants,
@@ -32,36 +33,55 @@ const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 
 const diagonal = new Diagonal(apiKey)
 
+// Create customer
+app.post('/create-account', async (req, res) => {
+  const email = req.body.email
+  const name = req.body.name
+
+  // step 1: create diagonal customer
+  const customer = await diagonal.customers.create({
+    email,
+  })
+
+  // step 2: create a user in your database, store customer id along side it
+  // createUser({email: email, name: name, diagonal_customer_id: customer.id})
+
+  res.sendStatus(200)
+})
+
 // Checkout sessions
-app.post(
-  '/create-checkout-session/:customerId',
-  async (req: Request, res: Response) => {
-    // While creating a checkout session, you can pass in a customer ID
-    // to associate the session with a customer. This will allow you to
-    // retrieve the customer's subscriptions later.
-    let customer = await diagonal.customers.get(req.params.customerId)
-    if (!customer) {
-      // You can provide any customer data you want here
-      // Obtained through your own customer database or from the request
-      customer = await diagonal.customers.create()
-    }
+app.post('/create-checkout-session/', async (req: Request, res: Response) => {
+  // While creating a checkout session, you can pass in a customer ID
+  // to associate the session with a customer. This will allow you to
+  // retrieve the customer's subscriptions later.
+  let customerId = req.body.customerId
 
-    const input: CheckoutSessionCreateParams = {
-      cancel_url: 'https://example.com/cancel',
-      success_url: 'https://example.com/success',
-      amount: '10',
-      subscription: {
-        interval: 'month',
-        interval_count: 1,
-      },
-      customer_id: customer.id,
-    }
+  if (!customerId) {
+    // You can provide any customer data you want here
+    // Obtained through your own customer database or from the request
+    // 1: read email from DB or body
+    const email = ''
 
-    const checkoutSession = await diagonal.checkout.sessions.create(input)
+    // 2: create customer
+    const customer = await diagonal.customers.create({ email })
+    customerId = customer.id
+  }
 
-    res.redirect(checkoutSession.url)
-  },
-)
+  const input: CheckoutSessionCreateParams = {
+    cancel_url: 'https://example.com/cancel',
+    success_url: 'https://example.com/success',
+    amount: '10',
+    subscription: {
+      interval: 'month',
+      interval_count: 1,
+    },
+    customer_id: customerId,
+  }
+
+  const checkoutSession = await diagonal.checkout.sessions.create(input)
+
+  res.redirect(checkoutSession.url)
+})
 
 // Subscriptions
 app.put('/upgrade-subscription/:id', async (req: Request, res: Response) => {

@@ -2,7 +2,7 @@
 
 In this repository you can find language specific examples for interaction with the Diagonal backend.
 
-For more details visit: https://docs.diagonal.finance/ 
+For more details visit: https://docs.diagonal.finance/
 
 ## `.env` config
 
