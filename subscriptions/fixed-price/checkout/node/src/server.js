@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+// @ts-nocheck
 const dotenv = require('dotenv')
 const express = require('express')
 const { Constants, DiagonalError, Diagonal } = require('diagonal')
@@ -28,15 +29,16 @@ const diagonal = new Diagonal(apiKey)
 // Create an account for your customer
 app.post('/create-account/', async (req, res) => {
   const email = req.body.email
-  const name = req.body.name
+  // const name = req.body.name
+  // ...
 
   // step 1: create diagonal customer
   const customer = await diagonal.customers.create({
     email,
-    name,
   })
 
   // step 2: create a user in your database, store Diagonal customer id along side it
+  // createUser(email, name, customer.id, ...)
 
   res.sendStatus(200)
 })
@@ -52,6 +54,11 @@ app.post('/create-checkout-session/', async (req, res) => {
     cancel_url: 'https://example.com/cancel',
     success_url: 'https://example.com/success',
     amount: '10',
+    payment_options: [
+      {
+        tokens: ['usdc', 'dai'],
+      },
+    ],
     subscription: {
       interval: 'month',
       interval_count: 1,
@@ -65,14 +72,16 @@ app.post('/create-checkout-session/', async (req, res) => {
 })
 
 // Subscriptions
-app.put('/upgrade-subscription/:id', async (req, res) => {
+app.put('/update-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
+  const amount = req.body.amount // e.g. '20'
+  const billingInterval = req.body.billingInterval // e.g. 'month' or 'year'
 
   // You can upgrade a subscription by updating the subscription's amount
   // and interval. The subscription will be updated immediately.
   const input = {
-    billing_amount: '20',
-    billing_interval: 'month',
+    billing_amount: amount,
+    billing_interval: billingInterval,
     billing_interval_count: 1,
     charge_behaviour: 'immediate',
     prorate: true,

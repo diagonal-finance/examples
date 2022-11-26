@@ -5,10 +5,7 @@ module.exports = {
     jasmine: true,
     jest: true,
   },
-  extends: [
-    'eslint:recommended',
-    'prettier'
-  ],
+  extends: ['eslint:recommended', 'prettier'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
@@ -18,12 +15,12 @@ module.exports = {
   rules: {
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
-     'error', // or error
-      { 
+      'error', // or error
+      {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^_',
       },
-    ]
+    ],
   },
 }
