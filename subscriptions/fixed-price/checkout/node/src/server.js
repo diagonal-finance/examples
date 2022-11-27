@@ -18,8 +18,10 @@ const app = express()
 app.use(express.json()) // to support JSON-encoded bodies
 app.use(express.urlencoded({ extended: true })) // to support URL-encoded bodies
 
+// Use test api key for development and live api key for production
 const apiKey = process.env.DIAGONAL_API_KEY
 const signingKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY
+// Use test webhook secret for development and live webhook secret for production
 const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
 
 const diagonal = new Diagonal(apiKey)
