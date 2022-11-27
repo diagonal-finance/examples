@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // @ts-nocheck
-const dotenv = require('dotenv')
 const express = require('express')
 const { Constants, DiagonalError, Diagonal } = require('diagonal')
-
-dotenv.config()
+require('dotenv').config()
 
 const isEnvConfigured =
   process.env.DIAGONAL_API_KEY &&
