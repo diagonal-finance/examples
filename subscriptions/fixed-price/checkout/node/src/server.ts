@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
+import type {
   CheckoutSessionCreateParams,
-  Constants,
-  Diagonal,
-  DiagonalError,
   Event,
   SubscriptionCancelParams,
   SubscriptionUpdateParams,
 } from 'diagonal'
-import * as dotenv from 'dotenv'
+
+import { Diagonal, Constants, DiagonalError } from 'diagonal'
 import express, { Request, Response } from 'express'
+
+import * as dotenv from 'dotenv'
 
 dotenv.config()
 
