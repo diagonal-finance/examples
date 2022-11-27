@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type {
-  CheckoutSessionCreateParams,
-  Event,
-  SubscriptionCancelParams,
-  SubscriptionUpdateParams,
-} from 'diagonal'
-
-import { Diagonal, Constants, DiagonalError } from 'diagonal'
+import { Diagonal, Constants, DiagonalError, Event } from 'diagonal'
 import express, { Request, Response } from 'express'
 
 import * as dotenv from 'dotenv'
-
 dotenv.config()
 
 const isEnvConfigured =
@@ -57,7 +49,7 @@ app.post('/create-checkout-session/', async (req: Request, res: Response) => {
   // retrieve the customer's subscriptions later.
   let customerId = req.body.customerId
 
-  const input: CheckoutSessionCreateParams = {
+  const checkoutSession = await diagonal.checkout.sessions.create({
     cancel_url: 'https://example.com/cancel',
     success_url: 'https://example.com/success',
     amount: '10',
@@ -71,9 +63,7 @@ app.post('/create-checkout-session/', async (req: Request, res: Response) => {
       interval_count: 1,
     },
     customer_id: customerId,
-  }
-
-  const checkoutSession = await diagonal.checkout.sessions.create(input)
+  })
 
   res.redirect(checkoutSession.url)
 })
@@ -84,17 +74,15 @@ app.post('/upgrade-subscription/:id', async (req: Request, res: Response) => {
 
   // You can upgrade a subscription by updating the subscription's amount
   // and interval. The subscription will be updated immediately.
-  const input: SubscriptionUpdateParams = {
-    billing_amount: '20',
-    billing_interval: 'month',
-    billing_interval_count: 1,
-    charge_behaviour: 'immediate',
-    prorate: true,
-  }
-
   const updatedSubscription = await diagonal.subscriptions.update(
     subscriptionId,
-    input,
+    {
+      billing_amount: '20',
+      billing_interval: 'month',
+      billing_interval_count: 1,
+      charge_behaviour: 'immediate',
+      prorate: true,
+    },
   )
 
   res.sendStatus(200)
@@ -106,14 +94,13 @@ app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
   // You can cancel a subscription immediately or at the end of the current billing period.
   // In this example, we follow the recommended approach and cancel the subscription at the end of the billing period,
   // while charging any outstanding amount immediately.
-  const input: SubscriptionCancelParams = {
-    charge_behaviour: 'immediate',
-    end_of_period: true,
-  }
 
   const canceledSubscription = await diagonal.subscriptions.cancel(
     subscriptionId,
-    input,
+    {
+      charge_behaviour: 'immediate',
+      end_of_period: true,
+    },
   )
 
   res.sendStatus(200)
