@@ -79,16 +79,14 @@ app.post('/create-checkout-session/', async (req: Request, res: Response) => {
 })
 
 // Subscriptions
-app.post('/update-subscription/:id', async (req: Request, res: Response) => {
+app.post('/upgrade-subscription/:id', async (req: Request, res: Response) => {
   const subscriptionId = req.params.id
-  const amount = req.body.amount // e.g. '20'
-  const billingInterval = req.body.billingInterval // e.g. 'month' or 'year'
 
   // You can upgrade a subscription by updating the subscription's amount
   // and interval. The subscription will be updated immediately.
   const input: SubscriptionUpdateParams = {
-    billing_amount: amount,
-    billing_interval: billingInterval,
+    billing_amount: '20',
+    billing_interval: 'month',
     billing_interval_count: 1,
     charge_behaviour: 'immediate',
     prorate: true,
