@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Diagonal, Constants, DiagonalError, Event } from 'diagonal'
-import express, { Request, Response } from 'express'
+import express from 'express'
 
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -26,7 +26,7 @@ const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 const diagonal = new Diagonal(apiKey)
 
 // Create an account for your customer
-app.post('/create-account/', async (req: Request, res: Response) => {
+app.post('/create-account/', async (req, res) => {
   const email = req.body.email
   // const name = req.body.name
   // ...
@@ -43,7 +43,7 @@ app.post('/create-account/', async (req: Request, res: Response) => {
 })
 
 // Checkout sessions
-app.post('/create-checkout-session/', async (req: Request, res: Response) => {
+app.post('/create-checkout-session/', async (req, res) => {
   // While creating a checkout session, you can pass in a customer ID
   // to associate the session with a customer. This will allow you to
   // retrieve the customer's subscriptions later.
@@ -69,7 +69,7 @@ app.post('/create-checkout-session/', async (req: Request, res: Response) => {
 })
 
 // Subscriptions
-app.post('/upgrade-subscription/:id', async (req: Request, res: Response) => {
+app.post('/upgrade-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
   // You can upgrade a subscription by updating the subscription's amount
@@ -88,7 +88,7 @@ app.post('/upgrade-subscription/:id', async (req: Request, res: Response) => {
   res.sendStatus(200)
 })
 
-app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
+app.post('/cancel-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
   // You can cancel a subscription immediately or at the end of the current billing period.
@@ -107,7 +107,7 @@ app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
 })
 
 // Webhook handling
-app.post('/webhook', async (req: Request, res: Response) => {
+app.post('/webhook', async (req, res) => {
   const payload = req.body
   const signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string
 
