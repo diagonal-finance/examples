@@ -16,7 +16,7 @@
     "lint-check": "npm run format:check && npm run lint"
   },
   "dependencies": {
-    "diagonal": "^0.0.2",
+    "diagonal": "^0.0.4",
     "dotenv": "^16.0.3",
     "express": "^4.18.1",
     "nodemon": "^2.0.16"

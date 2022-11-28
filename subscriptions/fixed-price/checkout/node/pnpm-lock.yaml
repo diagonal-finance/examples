@@ -7,7 +7,7 @@ specifiers:
   '@types/node': ^17.0.23
   '@typescript-eslint/eslint-plugin': ^5.23.0
   '@typescript-eslint/parser': ^5.23.0
-  diagonal: ^0.0.2
+  diagonal: ^0.0.4
   dotenv: ^16.0.3
   eslint: ^8.15.0
   eslint-config-prettier: ^8.5.0
@@ -24,7 +24,7 @@ specifiers:
   typescript: ^4.6.4
 
 dependencies:
-  diagonal: 0.0.2
+  diagonal: 0.0.4
   dotenv: 16.0.3
   express: 4.18.2
   nodemon: 2.0.20
@@ -237,14 +237,15 @@ packages:
       '@jridgewell/trace-mapping': 0.3.9
     dev: true
 
-  /@diagonal-finance/crypto/1.0.1:
-    resolution: {integrity: sha512-r8N2vvg98dIE9YUDUqzvRJLx3w69SrQSw20cpzYQE5ps5xGtVc8sQiR5F2fqz51bxhbkQJPqpPYu++ahZh0Efg==}
-    engines: {node: '>=16.15.1', npm: ^8.11.0}
+  /@diagonal-finance/crypto/1.0.2:
+    resolution: {integrity: sha512-DVL3+jh/A+hCXAnp7/uU/u0kglSkIAx8ZuK4xIoS/0X6BhcHXJkx9d8TN6aiJ/Nn2Zy+mLHh/a8HBdR2UGyzQQ==}
+    engines: {node: '>=16.16.0', npm: 8.11.0}
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/hash': 5.7.0
       '@ethersproject/keccak256': 5.7.0
       '@ethersproject/signing-key': 5.7.0
+      zod: 3.19.1
     dev: false
 
   /@eslint/eslintrc/1.3.3:
@@ -1274,11 +1275,11 @@ packages:
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
     dev: false
 
-  /diagonal/0.0.2:
-    resolution: {integrity: sha512-sbRTwo0mfWU67lnVMpfRscID09tiOeN7A62hPzJJJ4/yTbhv4HqPSYx6YOfcrDo+wBhHiOGpLQZ0znlNAEqHzw==}
-    engines: {node: '>=18.12.1', npm: ^8.11.2}
+  /diagonal/0.0.4:
+    resolution: {integrity: sha512-7vvQmH3i5rBtZhf9mLO+m2NHXlfGrv3bQayDkoOt0IM98XhuiszhIKOSNCOfhf2/6qU6ym8qcfdtdyc3skSz8w==}
+    engines: {node: '>=16.16.0', npm: 8.11.0}
     dependencies:
-      '@diagonal-finance/crypto': 1.0.1
+      '@diagonal-finance/crypto': 1.0.2
       '@ethersproject/units': 5.7.0
       axios: 1.1.3
       form-data: 4.0.0
