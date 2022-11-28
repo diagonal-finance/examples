@@ -26,7 +26,7 @@ npm start-ts
 or Javascript:
 
 ```
-npm start
+pnpm start
 ```
 
 3. You can interact with the server started at `localhost:3000`
