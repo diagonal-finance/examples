@@ -1,15 +1,8 @@
-import {
-  CheckoutSessionCreateParams,
-  Constants,
-  Diagonal,
-  DiagonalError,
-  Event,
-  SubscriptionCancelParams,
-  SubscriptionUpdateParams,
-} from 'diagonal'
-import * as dotenv from 'dotenv'
-import express, { Request, Response } from 'express'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Diagonal, Constants, DiagonalError, Event } from 'diagonal'
+import express from 'express'
 
+import * as dotenv from 'dotenv'
 dotenv.config()
 
 const isEnvConfigured =
@@ -26,85 +19,97 @@ const app = express()
 app.use(express.json()) // to support JSON-encoded bodies
 app.use(express.urlencoded({ extended: true })) // to support URL-encoded bodies
 
+// Use test api key for development and live api key for production
 const apiKey = process.env.DIAGONAL_API_KEY as string
 const signingKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY as string
+// Use test webhook secret for development and live webhook secret for production
 const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 
 const diagonal = new Diagonal(apiKey)
 
+// Create an account for your customer
+app.post('/create-account/', async (req, res) => {
+  const email = req.body.email
+  // const name = req.body.name
+  // ...
+
+  // step 1: create diagonal customer
+  const customer = await diagonal.customers.create({
+    email,
+  })
+
+  // step 2: create a user in your database, store Diagonal customer id along side it
+  // createUser(email, name, customer.id, ...)
+
+  res.sendStatus(200)
+})
+
 // Checkout sessions
-app.post(
-  '/create-checkout-session/:customerId',
-  async (req: Request, res: Response) => {
-    // While creating a checkout session, you can pass in a customer ID
-    // to associate the session with a customer. This will allow you to
-    // retrieve the customer's subscriptions later.
-    let customer = await diagonal.customers.get(req.params.customerId)
-    if (!customer) {
-      // You can provide any customer data you want here
-      // Obtained through your own customer database or from the request
-      customer = await diagonal.customers.create()
-    }
+app.post('/create-checkout-session/', async (req, res) => {
+  // While creating a checkout session, you can pass in a customer ID
+  // to associate the session with a customer. This will allow you to
+  // retrieve the customer's subscriptions later.
+  let customerId = req.body.customerId
 
-    const input: CheckoutSessionCreateParams = {
-      cancel_url: 'https://example.com/cancel',
-      success_url: 'https://example.com/success',
-      amount: '10',
-      subscription: {
-        interval: 'month',
-        interval_count: 1,
+  const checkoutSession = await diagonal.checkout.sessions.create({
+    cancel_url: 'https://example.com/cancel',
+    success_url: 'https://example.com/success',
+    amount: '10',
+    payment_options: [
+      {
+        tokens: ['usdc', 'dai'],
       },
-      customer_id: customer.id,
-    }
+    ],
+    subscription: {
+      interval: 'month',
+      interval_count: 1,
+    },
+    customer_id: customerId,
+  })
 
-    const checkoutSession = await diagonal.checkout.sessions.create(input)
-
-    res.redirect(checkoutSession.url)
-  },
-)
+  res.redirect(checkoutSession.url)
+})
 
 // Subscriptions
-app.put('/upgrade-subscription/:id', async (req: Request, res: Response) => {
+app.post('/upgrade-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
   // You can upgrade a subscription by updating the subscription's amount
   // and interval. The subscription will be updated immediately.
-  const input: SubscriptionUpdateParams = {
-    billing_amount: '20',
-    billing_interval: 'month',
-    billing_interval_count: 1,
-    charge_behaviour: 'immediate',
-    prorate: true,
-  }
-
   const updatedSubscription = await diagonal.subscriptions.update(
     subscriptionId,
-    input,
+    {
+      billing_amount: '20',
+      billing_interval: 'month',
+      billing_interval_count: 1,
+      charge_behaviour: 'immediate',
+      prorate: true,
+    },
   )
-  res.send(updatedSubscription)
+
+  res.sendStatus(200)
 })
 
-app.post('/cancel-subscription/:id', async (req: Request, res: Response) => {
+app.post('/cancel-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
   // You can cancel a subscription immediately or at the end of the current billing period.
   // In this example, we follow the recommended approach and cancel the subscription at the end of the billing period,
   // while charging any outstanding amount immediately.
-  const input: SubscriptionCancelParams = {
-    charge_behaviour: 'immediate',
-    end_of_period: true,
-  }
 
   const canceledSubscription = await diagonal.subscriptions.cancel(
     subscriptionId,
-    input,
+    {
+      charge_behaviour: 'immediate',
+      end_of_period: true,
+    },
   )
 
-  res.send(canceledSubscription)
+  res.sendStatus(200)
 })
 
 // Webhook handling
-app.post('/webhook', async (req: Request, res: Response) => {
+app.post('/webhook', async (req, res) => {
   const payload = req.body
   const signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string
 
