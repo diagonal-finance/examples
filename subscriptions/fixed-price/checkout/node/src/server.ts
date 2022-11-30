@@ -437,7 +437,7 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
         if (!subscriptionInDatabase) return;
       ```
 
-      If it is the first time the charge fails, the subscription will still be active
+      If it is the first time the charge fails, the subscription in your database will still be active
       so you may want to transition it to the past_due status, e.g.:
 
       ```
@@ -545,6 +545,8 @@ async function handleSubscriptionActive(
           SubscriptionTable.update(yourSubscription.id, {
             status: SubscriptionStatus.Active,
           })
+
+          // Perform any action that is required when a subscription is created
           break;
         default:
           break;
