@@ -65,7 +65,7 @@ app.post('/create-checkout-session/', async (req, res) => {
           const user = UserTable.update(user.id, {
             diagonalCustomerId: diagonalCustomer.id,
           })
-          
+
           diagonalCustomerId = diagonalCustomer.id
         }
       ```
@@ -110,7 +110,8 @@ app.post('/create-checkout-session/', async (req, res) => {
 app.post('/upgrade-subscription/:id', async (req, res) => {
   /*
       You can upgrade a subscription by updating the subscription's amount
-      and interval. The subscription will be updated immediately.
+      and interval. The subscription will be updated immediately. If a charge
+      is required to update the subscription, it will be automatically created.
 
       Refer to the documentation: https://docs.diagonal.finance/docs/upgrade-or-downgrade-subscriptions
       for more information on the update behaviour.
