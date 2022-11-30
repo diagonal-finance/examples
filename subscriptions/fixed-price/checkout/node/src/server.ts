@@ -245,6 +245,12 @@ async function handleSignatureChargeRequest(
  * You may use this event to provide feedback during a subscription update.
  * As it represents the first confirmation of a charge.
  *
+ * You may receive this event during:
+ * 1. Subscription due payment
+ * 2. Subscription creation payment
+ * 3. Subscription update payment
+ * 4. Subscription cancel payment
+ *
  * @param charge The charge object received in the event
  */
 async function handleChargeConfirmed(charge: Charge): Promise<void> {
@@ -346,6 +352,12 @@ async function handleChargeFinalized(charge: Charge): Promise<void> {
  * If you receive this event, means that the charge is no longer going to be retried.
  * You may want to schedule any flow that is required to handle uncollected revenue.
  *
+ * You may receive this event during:
+ * 1. Subscription due payment
+ * 2. Subscription creation payment
+ * 3. Subscription update payment
+ * 4. Subscription cancel payment
+ *
  * Note: A subscription will be automatically canceled when a charge transitions to the failed status.
  * So you don't need to manually trigger a subscription cancel.
  *
@@ -389,6 +401,11 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
  * If you want to get the reason, check in the `charge.last_attempt_failure_reason` field,
  * and to obtain the next attempt date, received as seconds since the Unix epoch,
  * it will be available at `charge.next_attempt_at`.
+ *
+ * You may receive this event during:
+ * 1. Subscription due payment
+ * 2. Subscription update payment
+ * 3. Subscription cancel payment
  *
  * Note: when creating a subscription, you will not receive this event, as the subscription
  * will be automatically expired if the first charge fails.
@@ -452,7 +469,6 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
  *
  * Moreover, if you want to provide feedback though the UI, you can use this event
  * as it's created just after checkout session is completed.
- *
  *
  * @param subscription The subscription object received in the event
  */
