@@ -67,7 +67,7 @@ app.post('/create-checkout-session/', async (req, res) => {
   */
   let customerId // diagonalCustomer.id
 
-  let planId = req.body.planId
+  const planId = req.body.planId
 
   // Fetch plan from your database or from any another provider
   const plan = {
