@@ -218,7 +218,7 @@ app.listen(3000, () => console.log('Running on port 3000'))
 /**
  * This handler is called when a signature charge request is received.
  *
- * It should create the ECDSA signature and capture it using the SDK.
+ * It should create the ECDSA signature, using your signing key, and capture it using the SDK.
  *
  * @param diagonal Diagonal SDK instance
  * @param signatureRequest The signature request event data
@@ -272,8 +272,8 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       we recommend you do so on the `charge.finalized` event instead. 
       
       You can check the `charge.attempts_count` property, being greater than 1, 
-      to determine if the charge is a past due payment or by checking the
-      subscriptionInDatabase status.
+      to determine if the charge is a past due payment or by checking the status of 
+      the subscription in your database. 
   */
   switch (charge.reason) {
     case 'subscription_update':
@@ -334,22 +334,22 @@ async function handleChargeFinalized(charge: Charge): Promise<void> {
   switch (charge.reason) {
     case 'subscription_due':
       /*
-          Recurring payment has succeeded, optionally update your database
+          Recurring payment has succeeded.
       */
       break
     case 'subscription_update':
       /*
-          Payment for the subscription update has succeeded, optionally update your database
+          Payment for the subscription update has succeeded. 
       */
       break
     case 'subscription_cancel':
       /*
-          Payment for subscription cancel has succeeded, optionally update your database
+          Payment for subscription cancel has succeeded.
       */
       break
     case 'subscription_creation':
       /*
-          Payment for subscription creation has succeeded, optionally update your database
+          Payment for subscription creation has succeeded.
       */
       break
     default:
