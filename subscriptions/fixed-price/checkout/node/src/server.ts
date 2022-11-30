@@ -515,6 +515,15 @@ async function handleSubscriptionCreated(
   */
 }
 
+/**
+ * This handler should be called when a subscription.active event is received.
+ *
+ * This event is triggered when a subscription is activated, which can happen
+ * during the creation of a subscription, or when a subscription transitions
+ * from the past_due status to the active status.
+ *
+ * @param subscription The subscription object received in the event
+ */
 async function handleSubscriptionActive(
   subscription: DiagonalSubscription,
 ): Promise<void> {
@@ -543,6 +552,13 @@ async function handleSubscriptionActive(
   */
 }
 
+/**
+ * This handler should be called when a subscription.updated event is received.
+ *
+ * You will receive this event whenever we update any attribute of the subscription.
+ *
+ * @param subscription The subscription object received in the event
+ */
 async function handleSubscriptionUpdated(
   subscription: DiagonalSubscription,
 ): Promise<void> {
@@ -560,11 +576,12 @@ async function handleSubscriptionUpdated(
   switch (subscription.status) {
     case 'active':
       /* 
-          You can receive an update when the subscription is updated or 
+          You can receive an update for an active subscription when it's updated through the
+          https://docs.diagonal.finance/reference/subscriptions-update endpoint or 
           when a successful due payment is made.
 
-          If you store the plan or product in the subscription reference,
-          you can check if this is an update, and act accordingly, e.g.:
+          If you store the plan or product in the subscription reference, and you provided 
+          it during the update, you can use it to act accordingly, e.g.:
 
           ```
             if (subscriptionToUpdate.planId !== subscription.reference) {
@@ -577,13 +594,15 @@ async function handleSubscriptionUpdated(
       break
     case 'canceling':
       /*
-          Handle the subscription transitions to canceling
+          Handle the subscription transitions to canceling, which happens when you
+          cancel the subscription through the https://docs.diagonal.finance/reference/subscriptions-cancel endpoint,
+          with the `end_of_period` parameter set to `true`.
       */
       break
     case 'trialing':
       /*
           If a subscription gets updated during the trial period, you will
-          receive an update with subscription status being trialing
+          receive an update with subscription status being trialing.
       */
       break
     default:
@@ -591,6 +610,16 @@ async function handleSubscriptionUpdated(
   }
 }
 
+/**
+ * This handler should be called when a subscription.canceled event is received.
+ *
+ * When you receive this event, the subscription has already been canceled.
+ * This can either happen when you cancel the subscription through the
+ * https://docs.diagonal.finance/reference/subscriptions-cancel endpoint, or
+ * when the subscription is canceled automatically due to a failed payment.
+ *
+ * @param subscription The subscription object received in the event
+ */
 async function handleSubscriptionCanceled(
   subscription: DiagonalSubscription,
 ): Promise<void> {
