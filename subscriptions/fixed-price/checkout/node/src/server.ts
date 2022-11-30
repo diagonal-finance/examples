@@ -46,6 +46,7 @@ const diagonal = new Diagonal(apiKey)
 
 app.post('/create-checkout-session/', async (req, res) => {
   /*
+
       While creating a checkout session, you can create a Diagonal customer
       so that you can later use it to identify the user of a given subscription, e.g.:
 
@@ -69,6 +70,7 @@ app.post('/create-checkout-session/', async (req, res) => {
           diagonalCustomerId = diagonalCustomer.id
         }
       ```
+
   */
   let customerId // diagonalCustomer.id
 
@@ -109,12 +111,16 @@ app.post('/create-checkout-session/', async (req, res) => {
 
 app.post('/upgrade-subscription/:id', async (req, res) => {
   /*
-      You can upgrade a subscription by updating the subscription's amount
-      and interval. The subscription will be updated immediately. If a charge
+
+      You can upgrade or downgrade a subscription by updating the subscription's amount
+      and/or interval. The subscription will be updated immediately. If a charge
       is required to update the subscription, it will be automatically created.
 
       Refer to the documentation: https://docs.diagonal.finance/docs/upgrade-or-downgrade-subscriptions
-      for more information on the update behaviour.
+      for more information on the update behaviour, or to the API reference:
+      https://docs.diagonal.finance/reference/subscriptions-update for the available parameters 
+      you can provide.
+
   */
 
   const subscriptionId = req.params.id
@@ -136,12 +142,15 @@ app.post('/cancel-subscription/:id', async (req, res) => {
   const subscriptionId = req.params.id
 
   /*
+
       You can cancel a subscription immediately or at the end of the current billing period.
-      In this example, we follow the recommended approach and cancel the subscription at the end of the billing period,
-      while charging any outstanding amount immediately.
+      Any outstanding amount will be charged immediately.
 
       Refer to the documentation: https://docs.diagonal.finance/docs/cancel-subscriptions
-      for more information on the cancel behaviour.
+      for more information on the cancel behaviour, or to the API reference:
+      https://docs.diagonal.finance/reference/subscriptions-cancel for the available parameters 
+      you can provide.
+
   */
   const canceledSubscription = await diagonal.subscriptions.cancel(
     subscriptionId,
@@ -260,6 +269,7 @@ async function handleSignatureChargeRequest(
  */
 async function handleChargeConfirmed(charge: Charge): Promise<void> {
   /*
+
       Getting the subscription from your database, e.g.:
 
       ```
@@ -268,9 +278,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
         })
         if (!subscriptionInDatabase) return;
       ```
-  */
 
-  /*
       Note: You may receive this event when a subscription is in past_due state,
       indicating the past due payment has now been confirmed. 
       
@@ -280,6 +288,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       You can check the `charge.attempts_count` property, being greater than 1, 
       to determine if the charge is a past due payment or by checking the status of 
       the subscription in your database. 
+
   */
   switch (charge.reason) {
     case 'subscription_update':
@@ -312,6 +321,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
  */
 async function handleChargeFinalized(charge: Charge): Promise<void> {
   /*
+
       Getting the subscription from your database, e.g.:
 
       ```
@@ -320,15 +330,14 @@ async function handleChargeFinalized(charge: Charge): Promise<void> {
         })
         if (!subscriptionInDatabase) return;
       ```
-  */
 
-  /*
       Note: You may receive this event when a subscription is in past_due state,
       indicating the past due payment has now been confirmed. 
       
       You can now update the subscription status to active, by checking the
       status is past due or through the `charge.attempts_count` property, 
       which is going to be greater than 1 e.g.:
+
       ```
         if (subscriptionInDatabase.status === SubscriptionStatus.PastDue) {
           SubscriptionTable.update(subscriptionInDatabase.id, {
@@ -336,6 +345,7 @@ async function handleChargeFinalized(charge: Charge): Promise<void> {
           })
         }
       ```
+
   */
   switch (charge.reason) {
     case 'subscription_due':
@@ -382,6 +392,7 @@ async function handleChargeFinalized(charge: Charge): Promise<void> {
  */
 async function handleChargeFailed(charge: Charge): Promise<void> {
   /*
+
       Getting the subscription from your database, e.g.:
       
       ```
@@ -390,25 +401,30 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
         })
         if (!subscriptionInDatabase) return;
       ```
+
   */
 
   if (charge.reason === 'subscription_creation') {
     /*
+
         If the subscription creation failed, you can remove the diagonal subscription 
         relation from the subscription in your database and redirect the user to a new checkout session.
 
         For these cases, Diagonal subscriptions transitions to `expired`.
+
     */
     return
   }
 
   /*
+
       Notify the user that the subscription charge failed
       for the reason specified in charge.last_attempt_failure_reason
       E.g. insufficient_balance or insufficient_allowance.
 
       Because this charge will not be retried again, you might want to schedule
       any flow that is required to handle uncollected revenue.
+
   */
 }
 
@@ -434,6 +450,7 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
  */
 async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
   /*
+
       Getting the subscription from your database, e.g.:
       
       ```
@@ -453,12 +470,15 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
           })
         }:
       ```
+
   */
 
   /*
+
       Notify the user that the subscription charge failed, 
       through your preferred channel, e.g. email or push,
       based on the failure reason specified in `charge.last_attempt_failure_reason`
+
   */
   switch (charge.reason) {
     case 'subscription_due':
@@ -496,6 +516,7 @@ async function handleSubscriptionCreated(
   subscription: DiagonalSubscription,
 ): Promise<void> {
   /*
+
       Find the user in your database using the relation to the Diagonal
       customer id, e.g.:
       ```
@@ -518,6 +539,7 @@ async function handleSubscriptionCreated(
       Note: The reference in the received subscription is the same as the one you provided
       in the checkout session used by the user. You can use this to link the
       subscription to any other entity in your database, e.g. a plan, a product, etc.
+
   */
 }
 
@@ -534,6 +556,7 @@ async function handleSubscriptionActive(
   subscription: DiagonalSubscription,
 ): Promise<void> {
   /*
+
       Find the subscription in your database using the relation to the Diagonal, e.g.:
 
       ```
@@ -546,17 +569,20 @@ async function handleSubscriptionActive(
       You can also receive this event when the subscription transitions from 
       past_due to active, so you may want to handle each case separately, e.g.:
 
-      switch (subscriptionInDatabase.status) {
-        case 'created':
-          SubscriptionTable.update(yourSubscription.id, {
-            status: SubscriptionStatus.Active,
-          })
+      ```
+        switch (subscriptionInDatabase.status) {
+          case 'created':
+            SubscriptionTable.update(yourSubscription.id, {
+              status: SubscriptionStatus.Active,
+            })
 
-          // Perform any action that is required when a subscription is created
-          break;
-        default:
-          break;
-      }
+            // Perform any action that is required when a subscription is created
+            break;
+          default:
+            break;
+        }
+      ```
+
   */
 }
 
@@ -584,6 +610,7 @@ async function handleSubscriptionUpdated(
   switch (subscription.status) {
     case 'active':
       /* 
+
           You can receive an update for an active subscription when it's updated through the
           https://docs.diagonal.finance/reference/subscriptions-update endpoint or 
           when a successful due payment is made.
@@ -598,19 +625,24 @@ async function handleSubscriptionUpdated(
               })
             }
           ```
+
       */
       break
     case 'canceling':
       /*
+
           Handle the subscription transitions to canceling, which happens when you
           cancel the subscription through the https://docs.diagonal.finance/reference/subscriptions-cancel endpoint,
           with the `end_of_period` parameter set to `true`.
+
       */
       break
     case 'trialing':
       /*
+
           If a subscription gets updated during the trial period, you will
           receive an update with subscription status being trialing.
+
       */
       break
     default:
@@ -632,6 +664,7 @@ async function handleSubscriptionCanceled(
   subscription: DiagonalSubscription,
 ): Promise<void> {
   /*
+
       Find the subscription in your database using the relation to the Diagonal, e.g.:
 
       ```
@@ -651,5 +684,6 @@ async function handleSubscriptionCanceled(
 
         // Call your notification service
       ```
+
   */
 }
