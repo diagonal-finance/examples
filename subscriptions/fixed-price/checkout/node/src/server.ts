@@ -230,20 +230,19 @@ async function handleSignatureChargeRequest(
   const charge = signatureRequest.data.charge
   const ecdsaSignature = diagonal.signatures.sign(signatureRequest, signingKey)
 
-  try {
-    await diagonal.charges.capture(charge.id, ecdsaSignature)
-  } catch (e) {
-    if (e instanceof DiagonalError) {
-      // Obtain error information
-    }
-  }
+  await diagonal.charges.capture(charge.id, ecdsaSignature)
 }
 
 /**
  * This handler should be called when a charge.confirmed event is received.
  *
- * You may use this event to provide feedback during a subscription update.
- * As it represents the first confirmation of a charge.
+ * You may use this event to provide feedback during a subscription update,
+ * as it represents the first confirmation of a charge.
+ *
+ * If you need to act as soon as the charge is confirmed, you can use
+ * this event instead of charge.finalized, as the latter is only triggered
+ * after the charge is considered final, which could take a few minutes,
+ * depending on the chain.
  *
  * You may receive this event during:
  * 1. Subscription due payment
@@ -265,6 +264,17 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       ```
   */
 
+  /*
+      Note: You may receive this event when a subscription is in past_due state,
+      indicating the past due payment has now been confirmed. 
+      
+      If you want to update the status of your subscription to active again, 
+      we recommend you do so on the `charge.finalized` event instead. 
+      
+      You can check the `charge.attempts_count` property, being greater than 1, 
+      to determine if the charge is a past due payment or by checking the
+      subscriptionInDatabase status.
+  */
   switch (charge.reason) {
     case 'subscription_update':
       /*
@@ -279,7 +289,8 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
 
 /**
  * This handler should be called when a charge.finalized event is received.
- * At this point the charge can be considered successful.
+ *
+ * At this point the charge can be considered successful and final.
  *
  * You may receive this event during:
  * 1. Subscription due payment
@@ -304,42 +315,42 @@ async function handleChargeFinalized(charge: Charge): Promise<void> {
         if (!subscriptionInDatabase) return;
       ```
   */
+
+  /*
+      Note: You may receive this event when a subscription is in past_due state,
+      indicating the past due payment has now been confirmed. 
+      
+      You can now update the subscription status to active, by checking the
+      status is past due or through the `charge.attempts_count` property, 
+      which is going to be greater than 1 e.g.:
+      ```
+        if (subscriptionInDatabase.status === SubscriptionStatus.PastDue) {
+          SubscriptionTable.update(subscriptionInDatabase.id, {
+            status: SubscriptionStatus.Active,
+          })
+        }
+      ```
+  */
   switch (charge.reason) {
     case 'subscription_due':
       /*
           Recurring payment has succeeded, optionally update your database
-          
-          If the subscription comes from the past_due status caused by a failed due payment,
-          and is now successful, you can now update the subscription status to active, e.g.:
-          ```
-            if (subscriptionInDatabase.status === SubscriptionStatus.PastDue) {
-              SubscriptionTable.update(subscriptionInDatabase.id, {
-                status: SubscriptionStatus.Active,
-              })
-            }
-          ```
       */
       break
     case 'subscription_update':
       /*
           Payment for the subscription update has succeeded, optionally update your database
-
-          If the subscription comes from the past_due status caused by a failed payment
-          during an update, and is now successful, you may want to update the status to active, e.g:
-          ```
-            if (subscriptionInDatabase.status !== SubscriptionStatus.Active) {
-              SubscriptionTable.update(subscriptionInDatabase.id, {
-                status: SubscriptionStatus.Active,
-              })
-            }
-          ```
       */
       break
     case 'subscription_cancel':
-      // Payment for subscription cancel has succeeded, optionally update your database
+      /*
+          Payment for subscription cancel has succeeded, optionally update your database
+      */
       break
     case 'subscription_creation':
-      // Payment for subscription creation has succeeded, optionally update your database
+      /*
+          Payment for subscription creation has succeeded, optionally update your database
+      */
       break
     default:
       break
@@ -375,21 +386,24 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
       ```
   */
 
-  /*
-      Notify the user that the subscription charge failed
-      for the reason specified in charge.last_attempt_failure_reason
-      E.g. insufficient_balance or insufficient_allowance
-  */
-
   if (charge.reason === 'subscription_creation') {
     /*
-        If the subscription creation failed, you can delete the subscription
-        from your database and redirect the user to a new checkout session.
+        If the subscription creation failed, you can remove the diagonal subscription 
+        relation from the subscription in your database and redirect the user to a new checkout session.
 
-        For these cases, subscriptions transition to `expired`.
+        For these cases, Diagonal subscriptions transitions to `expired`.
     */
     return
   }
+
+  /*
+      Notify the user that the subscription charge failed
+      for the reason specified in charge.last_attempt_failure_reason
+      E.g. insufficient_balance or insufficient_allowance.
+
+      Because this charge will not be retried again, you might want to schedule
+      any flow that is required to handle uncollected revenue.
+  */
 }
 
 /**
