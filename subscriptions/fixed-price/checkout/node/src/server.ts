@@ -54,15 +54,20 @@ app.post('/create-checkout-session/', async (req, res) => {
           req.user.id
         })
 
-        const diagonalCustomer = await diagonal.customers.create({
-          email: user.email,
-          name: user.name,
-          reference: user.id
-        })
+        let diagonalCustomerId = user.diagonalCustomerId;
+        if (diagonalCustomerId === undefined) {
+          const diagonalCustomer = await diagonal.customers.create({
+            email: user.email,
+            name: user.name,
+            reference: user.id
+          })
 
-        const user = UserTable.update(user.id, {
-          diagonalCustomerId: diagonalCustomer.id,
-        })
+          const user = UserTable.update(user.id, {
+            diagonalCustomerId: diagonalCustomer.id,
+          })
+          
+          diagonalCustomerId = diagonalCustomer.id
+        }
       ```
   */
   let customerId // diagonalCustomer.id
