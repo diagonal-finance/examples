@@ -63,9 +63,9 @@ const premiumPlan = {
  *  IMPORTANT fields
  *  - `customer_id`: WHO is paying
  *                   We recommend you pass a Diagonal customer id on checkout creation.
- *                   The `custoemer_id` will help link a paying subscriber to a completed checkout session.
+ *                   `customer_id` will help you link a paying subscriber to a completed checkout session.
  *
- *  - `reference`:   WHAT they are paying for
+ *  - `reference`  : WHAT they are paying for
  *                   We recommend you pass a `reference` for what the user is paying for on checkout creation.
  *                   Ideally this reference would refer to a unique product/plan/invoice id.
  *
@@ -75,7 +75,7 @@ const premiumPlan = {
  */
 app.post('/create-checkout-session/', async (req, res) => {
   /* 
-     ***************************** DB code - rewrite yourself ********************************      
+     ***************************** Database code - rewrite yourself ********************************      
       
      Create a Diagonal `Customer` if not found in DB
 
@@ -87,10 +87,10 @@ app.post('/create-checkout-session/', async (req, res) => {
 
         let diagonalCustomerId = user.diagonalCustomerId;
 
-        // Step 2: If user does not have a Diagonal customer id, create a new id and update DB
+        // Step 2: If user does not have a Diagonal customer id, create a new id and update user DB
         if (diagonalCustomerId === undefined) {
           
-          // Help Diagonal uniqly identify one of your customers
+          // Uniquely identify your customers
           const diagonalCustomer = await diagonal.customers.create({
             email: user.email,
             name: user.name,
@@ -124,18 +124,13 @@ app.post('/create-checkout-session/', async (req, res) => {
       interval: plan.interval,
       interval_count: plan.intervalCount,
     },
-    // Who is paying
-    customer_id: customerId,
-    // What they are paying for
-    reference: plan.id,
+    customer_id: customerId, // Who is paying
+    reference: plan.id, // What they are paying for
   })
 
   res.redirect(checkoutSession.url)
 })
 
-/**
- *  Subscriptions operations
- */
 app.post('/upgrade-subscription/:id', async (req, res) => {
   /*
     You can upgrade a subscription by updating the subscription's amount and/or interval.
@@ -202,7 +197,7 @@ app.post('/webhook', async (req, res) => {
     Handle webhook events
 
     Refer to https://docs.diagonal.finance/docs/subscriptions-events,
-    to learn more about the subscription lifecycle and the important events
+    to learn more about the subscription lifecycle
     
   */
   switch (event.type) {
@@ -242,9 +237,7 @@ app.post('/webhook', async (req, res) => {
 
 app.listen(3000, () => console.log('Running on port 3000'))
 
-/**
- *  Handlers
- */
+/********************************************************* Handlers ***************************************************************/
 
 /**
  * Handler should be called when you are asked to sign a charge request.
@@ -266,18 +259,26 @@ async function handleSignatureChargeRequest(
 }
 
 /**
- * This handler should be called when a charge.finalized event is received.
+ * Charge finalized
  *
- * At this point the charge can be considered successful and final.
+ * We recommend pivoting on `charge.finalized` when handling the following subscription lifecycle events:
+ *   - Subscription next period charge successful e.g Month 2 charge Alice 10 USDC
+ *   - Subscription update charge successful e.g. Update Alice subscription
+ *   - Subscription cancel charge successful
+ *   - Subscription past due charge successful
  *
- * Note: Due to the nature of blockchain, this event may be received
- * within a few minutes of the `charge.confirmed` event. For this reason
- * you should not rely on this event to provide feedback to the user.
+ * Note: A payment is only considered final when the `charge.finalized` is fired.
+ *       Some blockchains take longer to achieve "finality" than others, due to differing consensus mechanisms.
+ *       e.g. Ethereum ~2 minutes, Polygon ~4 minutes, Arbitrum ~13 seconds
+ *
+ *       For this reason you should not rely on `charge.finalized` to provide feedback to the user,
+ *       instead use `charge.confirmed`.
  *
  * @param charge The charge object received in the event
  */
 async function handleChargeFinalized(charge: Charge): Promise<void> {
   /*
+     ***************************** Database code - rewrite yourself ******************************** 
 
       Getting the subscription from your database, e.g.:
 
@@ -301,8 +302,8 @@ async function handleChargeFinalized(charge: Charge): Promise<void> {
           })
         }
       ```
-
   */
+
   switch (charge.reason) {
     case 'subscription_due':
       /*
