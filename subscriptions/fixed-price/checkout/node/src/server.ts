@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Diagonal, { Token, Chain, Constants, DiagonalError } from 'diagonal'
+import { Diagonal, Token, Chain, Constants, DiagonalError } from 'diagonal'
 import type {
   Event,
   Subscription as DiagonalSubscription,
@@ -34,11 +34,10 @@ const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
 const diagonal = new Diagonal(apiKey)
 
 /**
- *  Checkout session
- */
-
-/**
  * Plans
+ * Since you will be integrating fixed price subscriptions
+ * you will need some notion of plans/products, either defined locally, in your database,
+ * or using an external provider.
  */
 const basicPlan = {
   id: '1',
@@ -58,23 +57,44 @@ const premiumPlan = {
   intervalCount: 1,
 }
 
+/**
+ * Checkout session
+ *
+ *  IMPORTANT fields
+ *  - `customer_id`: WHO is paying
+ *                   We recommend you pass a Diagonal customer id on checkout creation.
+ *                   The `custoemer_id` will help link a paying subscriber to a completed checkout session.
+ *
+ *  - `reference`:   WHAT they are paying for
+ *                   We recommend you pass a `reference` for what the user is paying for on checkout creation.
+ *                   Ideally this reference would refer to a unique product/plan/invoice id.
+ *
+ *
+ *  NOTE: `customer_id` and `reference` will be available in the `subscription.created` webhook event.
+ *         This will help you verify WHO paid and WHAT they paid for.
+ */
 app.post('/create-checkout-session/', async (req, res) => {
   /*
-
-      While creating a checkout session, you can provide a Diagonal customer ID
-      so that you can later use it to identify the customer of a given subscription, e.g.:
+      ****************************** DB code - rewrite yourself ********************************      
+      
+     Create a Diagonal `Customer` if not found in DB
 
       ```
+        // Step 1: Get user from your DB
         const user = UserTable.findOne({
           req.user.id
         })
 
         let diagonalCustomerId = user.diagonalCustomerId;
+
+        // Step 2: If user does not have a Diagonal customer id, create a new id and update DB
         if (diagonalCustomerId === undefined) {
+          
+          // Help Diagonal uniqly identify one of your customers
           const diagonalCustomer = await diagonal.customers.create({
             email: user.email,
             name: user.name,
-            reference: user.id // optionally pass user id if (email, name) is not unique
+            reference: user.id // optionally pass some unique ref if (email, name) is not unique
           })
 
           const user = UserTable.update(user.id, {
@@ -84,24 +104,13 @@ app.post('/create-checkout-session/', async (req, res) => {
           diagonalCustomerId = diagonalCustomer.id
         }
       ```
-
   */
+
   let customerId // diagonalCustomer.id
 
-  // Fetch plan from your database, an external provider, or use locally defined plans
+  // You will need to pass the plan id from your frontend if you have multiple options
   const plan = req.body.plan === 'basic' ? basicPlan : premiumPlan
 
-  /*
-
-      Check the API reference: https://docs.diagonal.finance/reference/checkout-sessions-create 
-      for the available parameters you can provide.
-
-      Note: The `reference` parameter provided through the checkout session will be
-      available in the subscription created through it via the `subscription.reference` property.
-
-      You can use this to store a reference to the plan or product in your database.
-
-  */
   const checkoutSession = await diagonal.checkout.sessions.create({
     cancel_url: 'https://example.com/cancel',
     success_url: 'https://example.com/success',
@@ -115,8 +124,10 @@ app.post('/create-checkout-session/', async (req, res) => {
       interval: plan.interval,
       interval_count: plan.intervalCount,
     },
-    reference: plan.id,
+    // Who is paying
     customer_id: customerId,
+    // What they are paying for
+    reference: plan.id,
   })
 
   res.redirect(checkoutSession.url)
