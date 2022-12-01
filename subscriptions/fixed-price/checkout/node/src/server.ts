@@ -74,8 +74,8 @@ const premiumPlan = {
  *         This will help you verify WHO paid and WHAT they paid for.
  */
 app.post('/create-checkout-session/', async (req, res) => {
-  /*
-      ****************************** DB code - rewrite yourself ********************************      
+  /* 
+     ***************************** DB code - rewrite yourself ********************************      
       
      Create a Diagonal `Customer` if not found in DB
 
@@ -108,7 +108,7 @@ app.post('/create-checkout-session/', async (req, res) => {
 
   let customerId // diagonalCustomer.id
 
-  // You will need to pass the plan id from your frontend if you have multiple options
+  // If you are selling multiple products/service, pass the product id from your frontend
   const plan = req.body.plan === 'basic' ? basicPlan : premiumPlan
 
   const checkoutSession = await diagonal.checkout.sessions.create({
@@ -136,19 +136,11 @@ app.post('/create-checkout-session/', async (req, res) => {
 /**
  *  Subscriptions operations
  */
-
 app.post('/upgrade-subscription/:id', async (req, res) => {
   /*
-
-      You can upgrade or downgrade a subscription by updating the subscription's amount
-      and/or interval. The subscription will be updated immediately. If a charge
-      is required to update the subscription, it will be automatically created.
-
-      Refer to the documentation: https://docs.diagonal.finance/docs/upgrade-or-downgrade-subscriptions
-      for more information on the update behaviour, or to the API reference:
-      https://docs.diagonal.finance/reference/subscriptions-update for the available parameters 
-      you can provide.
-
+    You can upgrade a subscription by updating the subscription's amount and/or interval.
+    The subscription will be updated immediately, if a charge is required it will be automatically created.
+    Refer to: https://docs.diagonal.finance/docs/upgrade-or-downgrade-subscriptions
   */
 
   const subscriptionId = req.params.id
@@ -167,19 +159,13 @@ app.post('/upgrade-subscription/:id', async (req, res) => {
 })
 
 app.post('/cancel-subscription/:id', async (req, res) => {
-  const subscriptionId = req.params.id
-
   /*
-
-      You can cancel a subscription immediately or at the end of the current billing period.
-      Any outstanding amount will be charged immediately.
-
-      Refer to the documentation: https://docs.diagonal.finance/docs/cancel-subscriptions
-      for more information on the cancel behaviour, or to the API reference:
-      https://docs.diagonal.finance/reference/subscriptions-cancel for the available parameters 
-      you can provide.
-
+    You can cancel a subscription immediately or at the end of the current billing period.
+    Any outstanding amount will be charged immediately.
+    Refer to: https://docs.diagonal.finance/docs/cancel-subscriptions
   */
+
+  const subscriptionId = req.params.id
   const canceledSubscription = await diagonal.subscriptions.cancel(
     subscriptionId,
     {
@@ -194,7 +180,6 @@ app.post('/cancel-subscription/:id', async (req, res) => {
 /**
  *  Webhook handling
  */
-
 app.post('/webhook', async (req, res) => {
   const payload = req.body
   const signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string
@@ -214,13 +199,11 @@ app.post('/webhook', async (req, res) => {
   }
 
   /*
+    Handle webhook events
 
-    Handle the event based on its type.
-
-    Check out the documentation for more information on the different event types
-    and their importance based on the subscription lifecycle:
-    https://docs.diagonal.finance/docs/subscriptions-events
-
+    Refer to https://docs.diagonal.finance/docs/subscriptions-events,
+    to learn more about the subscription lifecycle and the important events
+    
   */
   switch (event.type) {
     case 'signature.charge.request': {
@@ -264,10 +247,7 @@ app.listen(3000, () => console.log('Running on port 3000'))
  */
 
 /**
- * This handler is called when a signature charge request is received.
- *
- * It should create the ECDSA signature, using your signing key, and capture it using the SDK.
- *
+ * Handler should be called when you are asked to sign a charge request.
  * @param diagonal Diagonal SDK instance
  * @param signatureRequest The signature request event data
  */
@@ -275,9 +255,13 @@ async function handleSignatureChargeRequest(
   diagonal: Diagonal,
   signatureRequest: Signature,
 ): Promise<void> {
+  // 1: Extract charge payload and optionally verify charge request
   const charge = signatureRequest.data.charge
+
+  //2: Use your signing key and attest to the charge request
   const ecdsaSignature = diagonal.signatures.sign(signatureRequest, signingKey)
 
+  // 3: Capture the charge request
   await diagonal.charges.capture(charge.id, ecdsaSignature)
 }
 
