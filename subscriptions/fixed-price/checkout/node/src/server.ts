@@ -262,79 +262,76 @@ async function handleSignatureChargeRequest(
  *
  *  We recommend pivoting on `charge.confirmed` when handling the following subscription lifecycle events:
  *
- *   - Subscription creation charge successful e.g. Month 1 Alice subscribes 10 USDC
- *   - Subscription due charge successful e.g Month 2 charge Alice 10 USDC
- *   - Subscription update charge successful e.g. Update Alice subscription to 20 USDC, and pro rates are active
- *   - Subscription cancel charge successful e.g. Cancel Alice subscription, but she has balance due.
- *   - Subscription past due charge successful e.g. Initially Failed to charge Alice, but now succeeded
+ *   - S1: Subscription creation charge successful e.g. Month 1 Alice subscribes 10 USDC
+ *   - S2: Subscription due charge successful e.g Month 2 charge Alice 10 USDC
+ *   - S3: Free trial converting
+ *   - S4: Subscription update charge successful e.g. Update Alice subscription to 20 USDC
+ *   - S5: Subscription cancel charge successful e.g. Cancel Alice subscription with due amount
+ *   - S6: Subscription past due charge successful e.g. Previous failed charge to Alice has now succeeded
  *
  * @param charge The charge object received in the event
  */
 async function handleChargeConfirmed(charge: Charge): Promise<void> {
   /*
      ***************************** Database code - rewrite yourself ******************************** 
-
-      Getting the subscription from your database to be used throughout pivoting
-
-      ```
-        const subscriptionInDatabase = SubscriptionTable.findOne({
-          diagonalSubscriptionId: charge.subscription_id,
-        })
-        if (!subscriptionInDatabase) return;
-      ```
-  */
-
-  /*
-     ***************************** Database code - rewrite yourself ******************************** 
       
-     Case 1: Free trial manual update and we charge immediatley
-
-     Case 2: Free trial converts
-
       ```
+        // Step 1: Read the subscription from your database
+
         const subscriptionInDatabase = SubscriptionTable.findOne({
           diagonalSubscriptionId: charge.subscription_id,
         })
 
+        if (!subscriptionInDatabase) return;
 
+        // Step 2: Handle free trials converting (S3 ✅)
 
         if (subscriptionInDatabase.status === SubscriptionStatus.trailing) {
             return handleChargeConfirmedAfterTrailing(charge)
         }
+
+
       ```
   */
 
+  // Handle past due charge successful (S6 ✅)
   if (charge.attempt_count > 1) {
     return handleChargeConfirmedAfterFailedAttempt(charge)
   }
 
   switch (charge.reason) {
     case 'subscription_creation':
+      // Handle subscription creation (S1 ✅)
       /*
-          Payment for subscription creation has succeeded.
+        You may want to do the following:
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
       */
       break
+
     case 'subscription_due':
+      // Handle subscription due (S2 ✅)
       /*
-        Case 1: Charge succeeded for month 2
-
-        - Send receipt to user
-        - Optionally store charges
-
+        You may want to do the following:
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
       */
       break
+
     case 'subscription_update':
+      // Handle subscription update and charge (S4 ✅)
       /*
-          Payment for the subscription update has succeeded. 
-
-        Case 1: Update amount to 20 and execute successful 
-
-
+        You may want to do the following:
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
       */
       break
     case 'subscription_cancel':
+      // Handle subscription cancel and charge (S5 ✅)
       /*
-          Payment for subscription cancel has succeeded.
+        You may want to do the following:
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
       */
       break
     default:
@@ -566,3 +563,19 @@ async function handleSubscriptionCanceled(
 
   */
 }
+
+/* 
+  
+  * SubscriptionTable is one-to-many with UserTable
+
+
+  * SubscriptionTable can store something such as teh following
+
+    NEEDS TO STORE SUBSCRIPTION STATUS
+  
+  
+  
+  
+  
+  
+  */
