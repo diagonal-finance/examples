@@ -314,45 +314,22 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     */
   }
   switch (charge.reason) {
-    // TODO: Should we create subsciprtion here?
-    // If no what status do we use in subscirpton.created?
-    // What is probablity of subscrpton created and chareg attempt failing?
-    // Do we have any gurantees
+    // TODO: Should we create subscription in DB here?
+    // If no what status do we use in subscription.created?
+    // What is probability of subscription created and charge attempt failing?
+    // Do we have any guarantees
 
-    case 'subscription_creation':
-      // Handle subscription creation (S1 ✅)
+    case 'subscription_creation': // S1 ✅
+    case 'subscription_due': // S2 ✅
+    case 'subscription_update': // S4 ✅
+    case 'subscription_cancel': // S5 ✅
       /*
         You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
-      */
-      break
-
-    case 'subscription_due':
-      // Handle subscription due (S2 ✅)
-      /*
-        You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
+        - Send an invoice to your customer.
+        - Store charges in your DB.
       */
       break
 
-    case 'subscription_update':
-      // Handle subscription update and charge (S4 ✅)
-      /*
-        You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
-      */
-      break
-    case 'subscription_cancel':
-      // Handle subscription cancel and charge (S5 ✅)
-      /*
-        You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
-      */
-      break
     default:
       break
   }
@@ -477,12 +454,16 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
 }
 
 /**
+ * Subscription canceled
+ *
+ *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
+ *
+ *   - S1: Subscription canceled failed
+ *
  * ENTRY POINT: Maximum retry
  * ENTRY POINT: Blacklisted
  * ENTRY POINT: API update user
  * ENTRY POINT: Transitioning from cancelling from cancelled
- *
- *
  *
  * This handler should be called when a subscription.canceled event is received.
  *
