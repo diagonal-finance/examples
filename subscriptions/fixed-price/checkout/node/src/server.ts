@@ -287,8 +287,10 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       // Handle free trials converting (S3 ✅)
       if (subscriptionInDatabase.status === SubscriptionStatus.Trailing) {
         
-        // Step 1
-        await updateSubscriptionToActive(charge)
+        // Step 1: Update subscription to active 
+        SubscriptionTable.update(subscriptionInDatabase.id, {
+          status: SubscriptionStatus.Active,
+        })
 
         // Step 2: Optionally send invoice and store charges locally
         // ...
@@ -303,8 +305,10 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
   if (charge.attempt_count > 1) {
     /*    
       ```
-        // Step 1:   
-        await updateSubscriptonToActive(charge)
+        // Step 1: Update subscription to active 
+        SubscriptionTable.update(subscriptionInDatabase.id, {
+          status: SubscriptionStatus.Active,
+        })
 
         // Step 2: Optionally send invoice and store charges locally
         // ...
@@ -320,6 +324,8 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     // Do we have any guarantees
 
     case 'subscription_creation': // S1 ✅
+      break
+
     case 'subscription_due': // S2 ✅
     case 'subscription_update': // S4 ✅
     case 'subscription_cancel': // S5 ✅
@@ -333,22 +339,6 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     default:
       break
   }
-}
-
-async function updateSubscriptionToActive(charge: Charge): Promise<void> {
-  /*
-      ```        
-        const subscriptionInDatabase = SubscriptionTable.findOne({
-          diagonalSubscriptionId: charge.subscription_id,
-        })
-
-
-        SubscriptionTable.update(subscriptionInDatabase.id, {
-            status: SubscriptionStatus.Active,
-        })
-
-      ```
-  */
 }
 
 /**
@@ -456,81 +446,66 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
 /**
  * Subscription canceled
  *
- *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
- *
- *   - S1: Subscription canceled failed
- *
- * ENTRY POINT: Maximum retry
- * ENTRY POINT: Blacklisted
- * ENTRY POINT: API update user
- * ENTRY POINT: Transitioning from cancelling from cancelled
- *
  * This handler should be called when a subscription.canceled event is received.
  *
  * When you receive this event, the subscription has already been canceled.
- * This can either happen when you cancel the subscription through the
- * https://docs.diagonal.finance/reference/subscriptions-cancel endpoint, or
- * when the subscription is canceled automatically due to a failed payment.
+ * This can either happen when you cancel the subscription through the UI or API,
+ * or when the subscription is canceled automatically due to a failed payment.
  *
  * @param subscription The subscription object received in the event
  */
 async function handleSubscriptionCanceled(
   subscription: DiagonalSubscription,
 ): Promise<void> {
-  // Handle subscription creation failed (S2 ✅)
   /*
-    You may want to do the following:
-    - Notify user that the charge failed for reasons specified in charge.last_attempt_failure_reason.
-        => If (charge.last_attempt_failure_reason == "insufficient_allowance")
-           Notify the user to increase their spending allowance on subscriptions.diagonal.finance
+    ////////////////////////////////// Database code - rewrite yourself /////////////////////////////////////////
 
-        => If (charge.last_attempt_failure_reason == "insufficient_balance")
-           Notify the user to fund their wallet
+    Step 1: Update subscription status
 
-    - Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
+    ```
+      const subscriptionInDatabase = SubscriptionTable.findOne({
+        diagonalSubscriptionId: subscription.id,
+      })
 
+      if (!subscriptionInDatabase) return;
+
+      // Update the subscription status in your database
+      SubscriptionTable.update(subscriptionToUpdate.id, {
+        status: SubscriptionStatus.Canceled,
+      })
+    
+    ```
   */
   /*
+    Step 2: Notify user
+    
+    You may want to do the following:
+      - Notify user that the their subscription has been canceled.
+      - Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
 
-        If the subscription creation failed, you can remove the diagonal subscription 
-        relation from the subscription in your database and redirect the user to a new checkout session
 
-
-      Find the subscription in your database using the relation to the Diagonal, e.g.:
-
-      ```
-        const subscriptionInDatabase = SubscriptionTable.findOne({
-          diagonalSubscriptionId: subscription.id,
-        })
-        if (!subscriptionInDatabase) return;
-      ```
-
-      Update the subscription status in your database, and trigger any
-      action, such as notifications, you may want to perform, e.g.:
-
-      ```
-        SubscriptionTable.update(subscriptionToUpdate.id, {
-          status: SubscriptionStatus.Canceled,
-        })
-
-        // Call your notification service
-      ```
+    // TODO: Question how do you get the reason for canceled event
+     * ENTRY POINT: Maximum retry
+     * ENTRY POINT: Blacklisted
+     * ENTRY POINT: API update user
+     * ENTRY POINT: Transitioning from cancelling from cancelled
 
   */
 }
 
-/********************************* Database overview **************************************************** */
+/********************************** Database overview ********************************************** */
 
 /* 
+  TODO: In this section it would be nice to have an overview of the schema's associated with the User and Subscriptions table
   
-  * SubscriptionTable is one-to-many with UserTable
+  SubscriptionTable is one-to-many with UserTable
+  
+  **Subscription Table**
+
+  **User Table**
 
 
-  * SubscriptionTable can store something such as the following
+  DISCLAIMER:
+  * Keep track of teh subscription status locally to avoid Diagonal rate limits
 
-    NEEDS TO STORE SUBSCRIPTION STATUS
-    - Stops having to query Diagonal everytime and handle Diagonal rate limits
-    - Is needed for stateful logic.
-  
-  
-  */
+*/
