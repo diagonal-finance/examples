@@ -273,8 +273,115 @@ async function handleSignatureChargeRequest(
  */
 async function handleChargeConfirmed(charge: Charge): Promise<void> {
   /*
-     ***************************** Database code - rewrite yourself ******************************** 
+    ////////////////////////////////// Database code - rewrite yourself /////////////////////////////////////////
       
+    ```
+      // Read the subscription from your database
+      const subscriptionInDatabase = SubscriptionTable.findOne({
+        diagonalSubscriptionId: charge.subscription_id,
+      })
+
+      if (!subscriptionInDatabase) return;
+
+      // Handle free trials converting (S3 ✅)
+      if (subscriptionInDatabase.status === SubscriptionStatus.Trailing) {
+        
+        // Step 1
+        await updateSubscriptionToActive(charge)
+
+        // Step 2: Optionally send invoice and store charges locally
+        // ...
+
+        return
+      }
+        
+    ```
+  */
+
+  // Handle past due charge successful (S6 ✅)
+  if (charge.attempt_count > 1) {
+    /*    
+      ```
+        // Step 1:   
+        await updateSubscriptonToActive(charge)
+
+        // Step 2: Optionally send invoice and store charges locally
+        // ...
+
+        return
+      ```
+    */
+  }
+
+  switch (charge.reason) {
+    case 'subscription_creation':
+      // Handle subscription creation (S1 ✅)
+      /*
+        You may want to do the following:
+        - Send an invoice to your user.
+        - Store charges locally.
+      */
+      break
+
+    case 'subscription_due':
+      // Handle subscription due (S2 ✅)
+      /*
+        You may want to do the following:
+        - Send an invoice to your user.
+        - Store charges locally.
+      */
+      break
+
+    case 'subscription_update':
+      // Handle subscription update and charge (S4 ✅)
+      /*
+        You may want to do the following:
+        - Send an invoice to your user.
+        - Store charges locally.
+      */
+      break
+    case 'subscription_cancel':
+      // Handle subscription cancel and charge (S5 ✅)
+      /*
+        You may want to do the following:
+        - Send an invoice to your user.
+        - Store charges locally.
+      */
+      break
+    default:
+      break
+  }
+}
+
+async function updateSubscriptionToActive(charge: Charge): Promise<void> {
+  /*
+      ```        
+        const subscriptionInDatabase = SubscriptionTable.findOne({
+          diagonalSubscriptionId: charge.subscription_id,
+        })
+
+
+        SubscriptionTable.update(subscriptionInDatabase.id, {
+            status: SubscriptionStatus.Active,
+        })
+
+      ```
+  */
+}
+
+/**
+ * Charge failed
+ *
+ *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
+ *
+ *   - S1: Subscription creation failed
+ *   - S2: Subscription is past due and maximum number of retry attempts reached
+ *
+ * @param charge The charge object received in the event
+ */
+async function handleChargeFailed(charge: Charge): Promise<void> {
+  /*
+
       ```
         // Step 1: Read the subscription from your database
 
@@ -284,118 +391,6 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
 
         if (!subscriptionInDatabase) return;
 
-        // Step 2: Handle free trials converting (S3 ✅)
-
-        if (subscriptionInDatabase.status === SubscriptionStatus.trailing) {
-            return handleChargeConfirmedAfterTrailing(charge)
-        }
-
-
-      ```
-  */
-
-  // Handle past due charge successful (S6 ✅)
-  if (charge.attempt_count > 1) {
-    return handleChargeConfirmedAfterFailedAttempt(charge)
-  }
-
-  switch (charge.reason) {
-    case 'subscription_creation':
-      // Handle subscription creation (S1 ✅)
-      /*
-        You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
-      */
-      break
-
-    case 'subscription_due':
-      // Handle subscription due (S2 ✅)
-      /*
-        You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
-      */
-      break
-
-    case 'subscription_update':
-      // Handle subscription update and charge (S4 ✅)
-      /*
-        You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
-      */
-      break
-    case 'subscription_cancel':
-      // Handle subscription cancel and charge (S5 ✅)
-      /*
-        You may want to do the following:
-        - Send a receipt to user for their purchase.
-        - Store charge for auditing purposes.
-      */
-      break
-    default:
-      break
-  }
-}
-
-async function handleChargeConfirmedAfterFailedAttempt(
-  charge: Charge,
-): Promise<void> {
-  /*
-
-
-      Case 1: Past due flow I, Charge succeeds coming from past due 
-
-
-      Case 2: Past due flow II, tried to update, not enough balance/allowance, moves to past due, and tries in 24 hours
-
-      Store status of a subscription locally so don't have to ping Diagonal everytime.
-      When coming from past due you need tp update.
-
-      Note: You may receive this event when a subscription is in past_due state,
-      indicating the past due payment has now been confirmed. 
-      
-      You can now update the subscription status to active, by checking the
-      status is past due, e.g.:
-
-      ```
-        if (subscriptionInDatabase.status === SubscriptionStatus.PastDue) {
-          SubscriptionTable.update(subscriptionInDatabase.id, {
-            status: SubscriptionStatus.Active,
-          })
-        }
-      ```
-
-      */
-}
-
-/**
- *
- * ENTRY POINTS: Subscription creation failed
- * ENTRY POINTS: Past due final failed
- * No massive biz logic changes
- *
- * This handler should be called when a charge.failed event is received.
- *
- * If you receive this event, means that the charge is no longer going to be retried.
- * You may want to schedule any flow that is required to handle uncollected revenue.
- *
- * Note: A subscription will be automatically canceled when a charge transitions to the failed status.
- * So you don't need to manually trigger a subscription cancel.
- *
- * @param charge The charge object received in the event
- */
-async function handleChargeFailed(charge: Charge): Promise<void> {
-  /*
-
-      Getting the subscription from your database, e.g.:
-      
-      ```
-        const subscriptionInDatabase = SubscriptionTable.findOne({
-          diagonalSubscriptionId: charge.subscription_id,
-        })
-        if (!subscriptionInDatabase) return;
       ```
 
   */
@@ -403,7 +398,11 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
   if (charge.reason === 'subscription_creation') {
     /*
 
-          Notify the user that the subscription charge failed
+        * Note: A subscription will be automatically canceled when a charge transitions to the failed status.
+        * So you don't need to manually trigger a subscription cancel.
+      
+ 
+        Notify the user that the subscription charge failed
         for the reason specified in charge.last_attempt_failure_reason
         E.g. insufficient_balance or insufficient_allowance.
 
@@ -444,13 +443,14 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
  */
 async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
   /*
-
-      Getting the subscription from your database, e.g.:
-      
+    
       ```
+        // Step 1: Read the subscription from your database
+
         const subscriptionInDatabase = SubscriptionTable.findOne({
           diagonalSubscriptionId: charge.subscription_id,
         })
+
         if (!subscriptionInDatabase) return;
       ```
 
@@ -564,18 +564,18 @@ async function handleSubscriptionCanceled(
   */
 }
 
+/********************************* Database overview **************************************************** */
+
 /* 
   
   * SubscriptionTable is one-to-many with UserTable
 
 
-  * SubscriptionTable can store something such as teh following
+  * SubscriptionTable can store something such as the following
 
     NEEDS TO STORE SUBSCRIPTION STATUS
-  
-  
-  
-  
+    - Stops having to query Diagonal everytime and handle Diagonal rate limits
+    - Is needed for stateful logic.
   
   
   */
