@@ -150,6 +150,7 @@ app.post('/upgrade-subscription/:id', async (req, res) => {
     },
   )
 
+  // TODO: needs to be update
   // NOTE: Update your database subscription entity to the new billing details
 
   res.sendStatus(200)
@@ -171,6 +172,7 @@ app.post('/cancel-subscription/:id', async (req, res) => {
     },
   )
 
+  // TODO: needs to be update
   // NOTE: Update your database subscription entity to canceling status
   // (as `end_of_period` is set to true)
 
@@ -236,7 +238,7 @@ app.post('/webhook', async (req, res) => {
 
 app.listen(3000, () => console.log('Running on port 3000'))
 
-/********************************************************* Handlers ***************************************************************/
+/***************************************** Handlers ***************************************************/
 
 /**
  * Handler should be called when you are asked to sign a charge request.
@@ -380,31 +382,14 @@ async function updateSubscriptionToActive(charge: Charge): Promise<void> {
  * @param charge The charge object received in the event
  */
 async function handleChargeFailed(charge: Charge): Promise<void> {
-  /*
-
-      ```
-        // Step 1: Read the subscription from your database
-
-        const subscriptionInDatabase = SubscriptionTable.findOne({
-          diagonalSubscriptionId: charge.subscription_id,
-        })
-
-        if (!subscriptionInDatabase) return;
-
-      ```
-
-  */
-
   if (charge.reason === 'subscription_creation') {
+    // Handle subscription creation failed (S1 ✅)
     /*
-
-        * Note: A subscription will be automatically canceled when a charge transitions to the failed status.
-        * So you don't need to manually trigger a subscription cancel.
-      
- 
-        Notify the user that the subscription charge failed
-        for the reason specified in charge.last_attempt_failure_reason
-        E.g. insufficient_balance or insufficient_allowance.
+        
+      You may want to do the following:
+      - Notify user that the charge failed for reason specified in charge.last_attempt_failure_reason
+    
+        Note: A subscription will be automatically canceled when a charge fails during subscription creation
 
         If the subscription creation failed, you can remove the diagonal subscription 
         relation from the subscription in your database and redirect the user to a new checkout session.
@@ -415,14 +400,19 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
     return
   }
 
+  // Handle subscription creation failed (S2 ✅)
   /*
+    You may want to do the following:
+      - Notify user that the charge failed for reasons specified in charge.last_attempt_failure_reason.
+        E.g. insufficient_balance or insufficient_allowance.
 
-      Notify the user that the subscription charge failed
-      for the reason specified in charge.last_attempt_failure_reason
-      E.g. insufficient_balance or insufficient_allowance.
+        => If (charge.last_attempt_failure_reason == "insufficient_allowance")
+          Notify the user to increase their spending allowance on subscriptions.diagonal.finance
 
-      Because this charge will not be retried again, you might want to schedule
-      any flow that is required to handle uncollected revenue.
+        => If (charge.last_attempt_failure_reason == "insufficient_balance")
+          Notify the user to get fund their wallet with tokens
+
+      - Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
 
   */
 }
