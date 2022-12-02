@@ -263,11 +263,12 @@ async function handleSignatureChargeRequest(
  *
  *  We recommend pivoting on `charge.confirmed` when handling the following subscription lifecycle events:
  *
- *   - S1: Subscription due charge successful e.g Month 2 charge Alice 10 USDC
- *   - S2: Free trial converting
- *   - S3: Subscription update charge successful e.g. Update Alice subscription to 20 USDC
- *   - S4: Subscription cancel charge successful e.g. Cancel Alice subscription with due amount
- *   - S5: Subscription past due charge successful e.g. Previous failed charge to Alice has now succeeded
+ *   - S1: Subscription creation charge successful e.g. Month 1 Alice subscribes 10 USDC
+ *   - S2: Subscription due charge successful e.g Month 2 charge Alice 10 USDC
+ *   - S3: Free trial converting
+ *   - S4: Subscription update charge successful e.g. Update Alice subscription to 20 USDC
+ *   - S5: Subscription cancel charge successful e.g. Cancel Alice subscription with due amount
+ *   - S6: Subscription past due charge successful e.g. Previous failed charge to Alice has now succeeded
  *
  * @param charge The charge object received in the event
  */
@@ -283,7 +284,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
 
       if (!subscriptionInDatabase) return;
 
-      // Handle free trials converting (S2 ✅)
+      // Handle free trials converting (S3 ✅)
       if (subscriptionInDatabase.status === SubscriptionStatus.Trailing) {
         
         // Step 1
@@ -298,7 +299,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     ```
   */
 
-  // Handle past due charge successful (S5 ✅)
+  // Handle past due charge successful (S6 ✅)
   if (charge.attempt_count > 1) {
     /*    
       ```
@@ -312,31 +313,44 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       ```
     */
   }
-
   switch (charge.reason) {
-    case 'subscription_due':
-      // Handle subscription due (S1 ✅)
+    // TODO: Should we create subsciprtion here?
+    // If no what status do we use in subscirpton.created?
+    // What is probablity of subscrpton created and chareg attempt failing?
+    // Do we have any gurantees
+
+    case 'subscription_creation':
+      // Handle subscription creation (S1 ✅)
       /*
         You may want to do the following:
-        - Send an invoice to your user.
-        - Store charges locally.
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
+      */
+      break
+
+    case 'subscription_due':
+      // Handle subscription due (S2 ✅)
+      /*
+        You may want to do the following:
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
       */
       break
 
     case 'subscription_update':
-      // Handle subscription update and charge (S3 ✅)
+      // Handle subscription update and charge (S4 ✅)
       /*
         You may want to do the following:
-        - Send an invoice to your user.
-        - Store charges locally.
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
       */
       break
     case 'subscription_cancel':
-      // Handle subscription cancel and charge (S4 ✅)
+      // Handle subscription cancel and charge (S5 ✅)
       /*
         You may want to do the following:
-        - Send an invoice to your user.
-        - Store charges locally.
+        - Send a receipt to user for their purchase.
+        - Store charge for auditing purposes.
       */
       break
     default:
@@ -357,6 +371,49 @@ async function updateSubscriptionToActive(charge: Charge): Promise<void> {
         })
 
       ```
+  */
+}
+
+/**
+ * Subscription created
+ *
+ * We recommend pivoting on `subscription.created` when handling the following subscription lifecycle events:
+ *
+ *  - S1: Checkout session completed
+ *
+ * Use this event if you want to provide feedback though the UI,
+ * and create a new subscription in your database.
+ *
+ * @param subscription The subscription object received in the event
+ */
+async function handleSubscriptionCreated(
+  subscription: DiagonalSubscription,
+): Promise<void> {
+  /*
+      Find the user in your database using the Diagonal
+      customer id:
+
+      ```
+        const user = UserTable.findOne({
+          diagonalCustomerId: subscription.customer_id!,
+        })
+      ```
+
+      Create a new subscription in your database"
+    
+      ```
+        SubscriptionTable.create({
+          userId: user.id,
+          status: SubscriptionStatus.Active,
+          diagonalSubscriptionId: subscription.id,
+          planId: subscription.reference,
+        })
+      ```
+
+      Note: The reference in the received subscription is the same as the one you provided
+      in the checkout session used by the user. You can use this to link the
+      subscription to any other entity in your database, e.g. a plan, a product, etc.
+
   */
 }
 
@@ -391,7 +448,6 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
 }
 
 /**
- *
  * Charge attempt failed
  *
  * @param charge The charge object received in the event
@@ -418,58 +474,6 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
     default:
       break
   }
-}
-
-/**
- *
- * ENTRY POINT: Checkout session completion
- *              Use for super responisve subscription.
- *
- * This handler should be called when a subscription.created event is received.
- *
- * You can use this event to create a new subscription in your database and
- * link it to the user.
- *
- * Moreover, use this event if you want to provide feedback though the UI,
- * as it's created just after checkout session is completed.
- *
- * @param subscription The subscription object received in the event
- */
-async function handleSubscriptionCreated(
-  subscription: DiagonalSubscription,
-): Promise<void> {
-  /*
-
-      Find the user in your database using the relation to the Diagonal
-      customer id, e.g.:
-      ```
-        const user = UserTable.findOne({
-          diagonalCustomerId: subscription.customer_id!,
-        })
-      ```
-
-      Create a new subscription in your database, e.g.:
-    
-      ```
-        SubscriptionTable.create({
-          userId: user.id,
-          status: SubscriptionStatus.Created,
-          diagonalSubscriptionId: subscription.id,
-          planId: subscription.reference,
-        })
-      ```
-
-      You may want to do the following:
-        - Send an invoice to your user.
-        - Store charges locally.
-
-
-
-      Note: The reference in the received subscription is the same as the one you provided
-      in the checkout session used by the user. You can use this to link the
-      subscription to any other entity in your database, e.g. a plan, a product, etc.
-
-  */
 }
 
 /**
