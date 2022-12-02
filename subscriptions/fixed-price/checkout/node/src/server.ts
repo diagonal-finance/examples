@@ -150,8 +150,7 @@ app.post('/upgrade-subscription/:id', async (req, res) => {
     },
   )
 
-  // TODO: needs to be update
-  // NOTE: Update your database subscription entity to the new billing details
+  // NOTE: You may want to update the subscription entity in your database
 
   res.sendStatus(200)
 })
@@ -172,9 +171,9 @@ app.post('/cancel-subscription/:id', async (req, res) => {
     },
   )
 
-  // TODO: needs to be update
-  // NOTE: Update your database subscription entity to canceling status
-  // (as `end_of_period` is set to true)
+  // NOTE: You may want to update the subscription entity in your database
+  // If `end_of_period` field is set to true, update DB subscription status to `canceling`.
+  // If `end_of_period` field is set to false, update DB subscription status to `canceled`.
 
   res.sendStatus(200)
 })
@@ -264,12 +263,11 @@ async function handleSignatureChargeRequest(
  *
  *  We recommend pivoting on `charge.confirmed` when handling the following subscription lifecycle events:
  *
- *   - S1: Subscription creation charge successful e.g. Month 1 Alice subscribes 10 USDC
- *   - S2: Subscription due charge successful e.g Month 2 charge Alice 10 USDC
- *   - S3: Free trial converting
- *   - S4: Subscription update charge successful e.g. Update Alice subscription to 20 USDC
- *   - S5: Subscription cancel charge successful e.g. Cancel Alice subscription with due amount
- *   - S6: Subscription past due charge successful e.g. Previous failed charge to Alice has now succeeded
+ *   - S1: Subscription due charge successful e.g Month 2 charge Alice 10 USDC
+ *   - S2: Free trial converting
+ *   - S3: Subscription update charge successful e.g. Update Alice subscription to 20 USDC
+ *   - S4: Subscription cancel charge successful e.g. Cancel Alice subscription with due amount
+ *   - S5: Subscription past due charge successful e.g. Previous failed charge to Alice has now succeeded
  *
  * @param charge The charge object received in the event
  */
@@ -285,7 +283,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
 
       if (!subscriptionInDatabase) return;
 
-      // Handle free trials converting (S3 ✅)
+      // Handle free trials converting (S2 ✅)
       if (subscriptionInDatabase.status === SubscriptionStatus.Trailing) {
         
         // Step 1
@@ -300,7 +298,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     ```
   */
 
-  // Handle past due charge successful (S6 ✅)
+  // Handle past due charge successful (S5 ✅)
   if (charge.attempt_count > 1) {
     /*    
       ```
@@ -316,17 +314,8 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
   }
 
   switch (charge.reason) {
-    case 'subscription_creation':
-      // Handle subscription creation (S1 ✅)
-      /*
-        You may want to do the following:
-        - Send an invoice to your user.
-        - Store charges locally.
-      */
-      break
-
     case 'subscription_due':
-      // Handle subscription due (S2 ✅)
+      // Handle subscription due (S1 ✅)
       /*
         You may want to do the following:
         - Send an invoice to your user.
@@ -335,7 +324,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       break
 
     case 'subscription_update':
-      // Handle subscription update and charge (S4 ✅)
+      // Handle subscription update and charge (S3 ✅)
       /*
         You may want to do the following:
         - Send an invoice to your user.
@@ -343,7 +332,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       */
       break
     case 'subscription_cancel':
-      // Handle subscription cancel and charge (S5 ✅)
+      // Handle subscription cancel and charge (S4 ✅)
       /*
         You may want to do the following:
         - Send an invoice to your user.
@@ -377,7 +366,11 @@ async function updateSubscriptionToActive(charge: Charge): Promise<void> {
  *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
  *
  *   - S1: Subscription creation failed
- *   - S2: Subscription is past due and maximum number of retry attempts reached
+ *
+ *  DISCLAIMER: `charge.failed` can fire in other scenarios e.g.
+ *  "maximum number of retry attempts reached" or "address blacklist".
+ *
+ *  We recommend handling these scenarios in `handleSubscriptionCanceled`.
  *
  * @param charge The charge object received in the event
  */
@@ -385,84 +378,41 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
   if (charge.reason === 'subscription_creation') {
     // Handle subscription creation failed (S1 ✅)
     /*
-        
       You may want to do the following:
-      - Notify user that the charge failed for reason specified in charge.last_attempt_failure_reason
-    
-        Note: A subscription will be automatically canceled when a charge fails during subscription creation
+      - Notify user that the charge failed for reason specified in `charge.last_attempt_failure_reason`
+        e.g. "insufficient_balance" or "insufficient_allowance".
+       
+        => Redirect the user to new a checkout session.
 
-        If the subscription creation failed, you can remove the diagonal subscription 
-        relation from the subscription in your database and redirect the user to a new checkout session.
-
-        For these cases, Diagonal subscriptions transitions to `expired`.
+      - Remove diagonal subscription entry from your database
 
     */
-    return
   }
-
-  // Handle subscription creation failed (S2 ✅)
-  /*
-    You may want to do the following:
-      - Notify user that the charge failed for reasons specified in charge.last_attempt_failure_reason.
-        E.g. insufficient_balance or insufficient_allowance.
-
-        => If (charge.last_attempt_failure_reason == "insufficient_allowance")
-          Notify the user to increase their spending allowance on subscriptions.diagonal.finance
-
-        => If (charge.last_attempt_failure_reason == "insufficient_balance")
-          Notify the user to get fund their wallet with tokens
-
-      - Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
-
-  */
 }
 
 /**
  *
- * NOTIFY USER
- *
- * Case 1: Subscription dashboard
- * Case 2: Get more ERC20
- *
- * This handler should be called when a charge.attempt_failed event is received.
- *
- * You may want to use this event to contact the user in order to either increase their
- * allowance or balance.
+ * Charge attempt failed
  *
  * @param charge The charge object received in the event
  */
 async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
   /*
-    
-      ```
-        // Step 1: Read the subscription from your database
+    You may want to notify your user that the subscription charge failed, 
+    based on the failure reason specified in `charge.last_attempt_failure_reason`
 
-        const subscriptionInDatabase = SubscriptionTable.findOne({
-          diagonalSubscriptionId: charge.subscription_id,
-        })
-
-        if (!subscriptionInDatabase) return;
-      ```
-
+    Charge will be re-attempted at `charge.next_attempt_at`
   */
 
-  /*
-
-      Notify the user that the subscription charge failed, 
-      through your preferred channel, e.g. email or push,
-      based on the failure reason specified in `charge.last_attempt_failure_reason`
-
-      Will re-try charge at charge.next_attempt_at
-  */
   switch (charge.last_attempt_failure_reason) {
     case 'insufficient_allowance':
       /*
-          The attempt to charge for a subscription due has failed.
+          Notify the user to increase their spending allowance on subscriptions.diagonal.finance
       */
       break
     case 'insufficient_balance':
       /*
-          The attempt to charge for an update has failed.
+          Notify the user to fund their wallet
       */
       break
     default:
@@ -509,6 +459,12 @@ async function handleSubscriptionCreated(
         })
       ```
 
+      You may want to do the following:
+        - Send an invoice to your user.
+        - Store charges locally.
+
+
+
       Note: The reference in the received subscription is the same as the one you provided
       in the checkout session used by the user. You can use this to link the
       subscription to any other entity in your database, e.g. a plan, a product, etc.
@@ -517,6 +473,13 @@ async function handleSubscriptionCreated(
 }
 
 /**
+ * ENTRY POINT: Maximum retry
+ * ENTRY POINT: Blacklisted
+ * ENTRY POINT: API update user
+ * ENTRY POINT: Transitioning from cancelling from cancelled
+ *
+ *
+ *
  * This handler should be called when a subscription.canceled event is received.
  *
  * When you receive this event, the subscription has already been canceled.
@@ -529,7 +492,24 @@ async function handleSubscriptionCreated(
 async function handleSubscriptionCanceled(
   subscription: DiagonalSubscription,
 ): Promise<void> {
+  // Handle subscription creation failed (S2 ✅)
   /*
+    You may want to do the following:
+    - Notify user that the charge failed for reasons specified in charge.last_attempt_failure_reason.
+        => If (charge.last_attempt_failure_reason == "insufficient_allowance")
+           Notify the user to increase their spending allowance on subscriptions.diagonal.finance
+
+        => If (charge.last_attempt_failure_reason == "insufficient_balance")
+           Notify the user to fund their wallet
+
+    - Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
+
+  */
+  /*
+
+        If the subscription creation failed, you can remove the diagonal subscription 
+        relation from the subscription in your database and redirect the user to a new checkout session
+
 
       Find the subscription in your database using the relation to the Diagonal, e.g.:
 
