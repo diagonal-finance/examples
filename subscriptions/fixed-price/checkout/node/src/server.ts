@@ -377,7 +377,7 @@ async function handleSubscriptionCreated(
  *   - S1: Subscription creation failed
  *
  *  DISCLAIMER:
- *  `charge.failed` can fire in other scenarios e.g. "maximum number of retry attempts reached" or "address blacklist".
+ *  `charge.failed` can fire in other scenarios e.g. "maximum number of retry attempts reached" or "address blacklist usdc".
  *  We recommend handling these scenarios in `handleSubscriptionCanceled`.
  *
  * @param charge The charge object received in the event
@@ -436,42 +436,19 @@ async function handleSubscriptionCanceled(
   subscription: DiagonalSubscription,
 ): Promise<void> {
   /*
-    ////////////////////////////////// Database code - rewrite yourself /////////////////////////////////////////
-
-    Step 1: Update subscription status
-
-    ```
-      const subscriptionInDatabase = SubscriptionTable.findOne({
-        diagonalSubscriptionId: subscription.id,
-      })
-
-      if (!subscriptionInDatabase) return;
-
-      // Update the subscription status in your database
-      SubscriptionTable.update(subscriptionToUpdate.id, {
-        status: SubscriptionStatus.Canceled,
-      })
-    
-    ```
-  */
-  /*
-    Step 2: Notify user
-    
     You may want to do the following:
-      - Notify user that the their subscription has been canceled.
-      - Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
 
-      subscription.cancel_reason
-      "max_charge_attempts_reached"
-      ""
+    1: Update entry in the subscription table to status canceled:
+      ```
+        SubscriptionTable.update(subscriptionToUpdate.id, {
+          status: SubscriptionStatus.Canceled,
+        })
+      ```
+    
+    2: Notify user that the their subscription has been canceled, for a reason specified in `subscription.cancel_reason`. 
+      e.g. "max_charge_attempts_reached" or "address_blacklisted_by_usdc"
 
-
-    // TODO: Question how do you get the reason for canceled event
-     * ENTRY POINT: Maximum retry
-     * ENTRY POINT: Blacklisted
-     * ENTRY POINT: API update user
-     * ENTRY POINT: Transitioning from cancelling from cancelled
-
+    3: Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
   */
 }
 
