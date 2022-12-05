@@ -93,8 +93,8 @@ app.post('/create-checkout-session/', async (req, res) => {
           // Uniquely identify your customers
           const diagonalCustomer = await diagonal.customers.create({
             email: user.email,
-            name: user.name,
-            reference: user.id // optionally pass some unique ref if (email, name) is not unique
+            name: user.name, // optional
+            reference: user.id // optionally link diagonal customer to local user id
           })
 
           const user = UserTable.update(user.id, {
