@@ -463,10 +463,10 @@ async function handleSubscriptionCanceled(
 /* 
   **OVERVIEW**
   In the above handlers we have been referencing a `Subscription` and `User` relational database tables. These tables 
-  are meant to provide a high level example for how to handle the subscription lifecycle using Diagonal. Note, you are 
+  are meant to provide a high level example, for how to handle the subscription lifecycle using Diagonal. Note, you are 
   of course free to use non-relational databases.
   
-  We recommend you keep track of the following attributes in your database of choice:
+  We recommend keeping track of the following attributes in your database of choice:
   
   **Subscription Table**
     ...
