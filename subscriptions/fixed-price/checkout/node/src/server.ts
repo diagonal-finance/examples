@@ -373,6 +373,7 @@ async function handleSubscriptionCreated(
       ```
 
   */
+      console.log(subscription);
 }
 
 /**
@@ -389,7 +390,7 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
   */
 
   switch (charge.last_attempt_failure_reason) {
-    case 'insufficient_allowance':
+    case 'insufficient_spending_allowance':
       // Notify the user to increase their spending allowance on subscriptions.diagonal.finance
       break
     case 'insufficient_balance':
@@ -458,6 +459,7 @@ async function handleSubscriptionCanceled(
     3: Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
 
   */
+ console.log(subscription);
 }
 
 /********************************** Database overview ********************************************** */
