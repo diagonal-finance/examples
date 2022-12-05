@@ -25,6 +25,7 @@ const signingKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY
 const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
 
 const diagonal = new Diagonal(apiKey)
+
 /**
  * Plans
  * Since you will be integrating fixed price subscriptions
