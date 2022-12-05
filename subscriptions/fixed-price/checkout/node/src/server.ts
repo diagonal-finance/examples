@@ -423,7 +423,7 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
         SubscriptionTable.deleteOne({ diagonalSubscriptionId: charge.subscription_id })
       ```
 
-      2: Ask user to enter the checkout flow again, notify why charge failed.  
+      2: Ask user to resubscribe by creating a new checkout session - optionally notifying them why charge failed.  
          Use `charge.last_attempt_failure_reason` to specify reason for charge failure.
          e.g. "insufficient_balance" or "insufficient_allowance".
     */
