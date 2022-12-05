@@ -190,9 +190,7 @@ app.post('/cancel-subscription/:id', async (req, res) => {
   res.sendStatus(200)
 })
 
-/**
- *  Webhook handling
- */
+// Webhook handling
 app.post('/webhook', async (req, res) => {
   const payload = req.body
   const signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY] as string

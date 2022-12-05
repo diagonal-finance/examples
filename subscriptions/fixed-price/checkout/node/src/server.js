@@ -25,89 +25,159 @@ const signingKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY
 const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
 
 const diagonal = new Diagonal(apiKey)
+/**
+ * Plans
+ * Since you will be integrating fixed price subscriptions
+ * you will need some notion of plans/products, either defined locally, in your database,
+ * or using an external provider. In this example we choose to define plans locally.
+ */
+const basicPlan = {
+  id: '1',
+  amount: '10',
+  tokens: ['dai', 'usdc'],
+  chains: ['ethereum', 'polygon'],
+  interval: 'month',
+  intervalCount: 1,
+}
 
-// Create an account for your customer
-app.post('/create-account/', async (req, res) => {
-  const email = req.body.email
-  // const name = req.body.name
-  // ...
+const premiumPlan = {
+  id: '2',
+  amount: '50',
+  tokens: ['dai', 'usdc'],
+  chains: ['ethereum', 'polygon'],
+  interval: 'month',
+  intervalCount: 1,
+}
 
-  // step 1: create diagonal customer
-  const customer = await diagonal.customers.create({
-    email,
-  })
-
-  // step 2: create a user in your database, store Diagonal customer id along side it
-  // createUser(email, name, customer.id, ...)
-
-  res.sendStatus(200)
-})
-
-// Checkout sessions
+/**
+ * Checkout session
+ *
+ *  IMPORTANT fields
+ *  - `customer_id`: WHO is subscribing
+ *                   We recommend you pass a Diagonal customer id when creating a checkout creation.
+ *                   `customer_id` will help you link a paying subscriber to a completed checkout session.
+ *
+ *  - `reference`  : WHAT they are subscribing to
+ *                   We recommend you pass a `reference` for what the user is paying for on checkout creation.
+ *                   Ideally this reference would refer to a unique product/plan/invoice id.
+ *
+ *
+ *  NOTE: `customer_id` and `reference` will be available in the `subscription.created` webhook event.
+ *         This will help you verify WHO subscribed and WHAT they paid for.
+ */
 app.post('/create-checkout-session/', async (req, res) => {
-  // While creating a checkout session, you can pass in a customer ID
-  // to associate the session with a customer. This will allow you to
-  // retrieve the customer's subscriptions later.
-  const customerId = req.params.customerId
+  /* 
+     ***************************** Database code - rewrite yourself ********************************      
+      
+     Create a Diagonal `Customer` if not found in DB
 
-  const input = {
+      ```
+        // Step 1: Get user from your DB
+        const user = UserTable.findOne({
+          req.user.id
+        })
+
+        let diagonalCustomerId = user.diagonalCustomerId;
+
+        // Step 2: If user does not have a Diagonal customer id, create a new id and update user DB
+        if (diagonalCustomerId === undefined) {
+          
+          // Uniquely identify your customers
+          const diagonalCustomer = await diagonal.customers.create({
+            email: user.email,
+            name: user.name, // optional
+            reference: user.id // optionally link diagonal customer to local user id
+          })
+
+          const user = UserTable.update(user.id, {
+            diagonalCustomerId: diagonalCustomer.id,
+          })
+
+          diagonalCustomerId = diagonalCustomer.id
+        }
+      ```
+  */
+
+  let customerId // diagonalCustomer
+
+  // If you are selling multiple products/services, pass the product id from your frontend
+  const plan = req.body.plan === 'basic' ? basicPlan : premiumPlan
+
+  const checkoutSession = await diagonal.checkout.sessions.create({
     cancel_url: 'https://example.com/cancel',
     success_url: 'https://example.com/success',
-    amount: '10',
+    amount: plan.amount,
     payment_options: [
       {
-        tokens: ['usdc', 'dai'],
+        tokens: plan.tokens,
       },
     ],
     subscription: {
-      interval: 'month',
-      interval_count: 1,
+      interval: plan.interval,
+      interval_count: plan.intervalCount,
     },
-    customer_id: customerId,
-  }
-
-  const checkoutSession = await diagonal.checkout.sessions.create(input)
+    customer_id: customerId, // Who is subscribing
+    reference: plan.id, // What they are subscribing to
+  })
 
   res.redirect(checkoutSession.url)
 })
 
-// Subscriptions
 app.post('/upgrade-subscription/:id', async (req, res) => {
-  const subscriptionId = req.params.id
+  /*
+    You can upgrade a subscription by updating the subscription's amount and/or interval.
+    The subscription will be updated immediately, if a a prorated charge is required, it will be created and processed automatically.
+    Refer to: https://docs.diagonal.finance/docs/upgrade-or-downgrade-subscriptions
+  */
 
-  // You can upgrade a subscription by updating the subscription's amount
-  // and interval. The subscription will be updated immediately.
-  const input = {
-    billing_amount: '20',
-    billing_interval: 'month',
-    billing_interval_count: 1,
-    charge_behaviour: 'immediate',
-    prorate: true,
-  }
+  const subscriptionId = req.params.id
+  const plan = req.body.plan === 'basic' ? basicPlan : premiumPlan
 
   const updatedSubscription = await diagonal.subscriptions.update(
     subscriptionId,
-    input,
+    {
+      billing_amount: '20',
+      billing_interval: 'month',
+      billing_interval_count: 1,
+      charge_behaviour: 'immediate',
+      prorate: true,
+    },
   )
+
+  /*
+    If using plans you may want to update the planId on the DB subscription entity
+    ```
+      SubscriptionTable.update(subscriptionId, { planId: premiumPlan.id })
+    ```
+  */
 
   res.sendStatus(200)
 })
 
 app.post('/cancel-subscription/:id', async (req, res) => {
+  /*
+    You can cancel a subscription immediately or at the end of the current billing period.
+    Any outstanding amount will be charged immediately.
+    Refer to: https://docs.diagonal.finance/docs/cancel-subscriptions
+  */
+
   const subscriptionId = req.params.id
-
-  // You can cancel a subscription immediately or at the end of the current billing period.
-  // In this example, we follow the recommended approach and cancel the subscription at the end of the billing period,
-  // while charging any outstanding amount immediately.
-  const input = {
-    charge_behaviour: 'immediate',
-    end_of_period: true,
-  }
-
   const canceledSubscription = await diagonal.subscriptions.cancel(
     subscriptionId,
-    input,
+    {
+      charge_behaviour: 'immediate',
+      end_of_period: true,
+    },
   )
+
+  /*
+    If using plans you may want to update the planId on the DB subscription entity.
+    If `end_of_period` == true, update DB subscription status to `canceling`.
+    If `end_of_period` == false, update DB subscription status to `canceled`.
+    ```
+      SubscriptionTable.update(subscriptionId, { status: '...' })
+    ```
+  */
 
   res.sendStatus(200)
 })
@@ -118,7 +188,6 @@ app.post('/webhook', async (req, res) => {
   const signatureHeader = req.headers[Constants.SIGNATURE_HEADER_KEY]
 
   let event
-
   try {
     event = diagonal.webhooks.constructEvent(
       payload,
@@ -132,78 +201,34 @@ app.post('/webhook', async (req, res) => {
     return res.sendStatus(400)
   }
 
-  // Handle the event
+  /*
+    Handle webhook events
+
+    Refer to https://docs.diagonal.finance/docs/subscriptions-events,
+    to learn more about the subscription lifecycle
+    
+  */
   switch (event.type) {
-    case 'signature.charge.request':
-      {
-        console.log(`Charge signature request`)
-
-        // Handle the charge signature request event here
-        const signatureRequest = event.data
-        const charge = signatureRequest.data.charge
-
-        const ecdsaSignature = diagonal.signatures.sign(
-          signatureRequest,
-          signingKey,
-        )
-
-        try {
-          await diagonal.charges.capture(charge.id, ecdsaSignature)
-          // charge has been captured successfully
-        } catch (e) {
-          if (e instanceof DiagonalError) {
-            // Obtain error information
-          }
-        }
-      }
+    case 'signature.charge.request': {
+      await handleSignatureChargeRequest(diagonal, event.data)
       break
-    case 'charge.created':
-      console.log(`Charge created`)
-      // Handle the charge created event here
-      // ...
-      break
+    }
     case 'charge.confirmed':
-      console.log(`Charge confirmed`)
-      // Handle the charge confirmed event here
-      // ...
-      break
-    case 'charge.finalized':
-      console.log(`Charge finalized`)
-      // Handle the charge finalized here
-      // ...
+      handleChargeConfirmed(event.data)
       break
     case 'charge.failed':
-      console.log(`Charge failed`)
-      // Handle the charge failed event here
-      // ...
+      handleChargeFailed(event.data)
       break
     case 'charge.attempt_failed':
-      console.log(`Charge attempt failed`)
-      // Handle the charge attempt failed event here
-      // ...
+      handleChargeAttemptFailed(event.data)
       break
     case 'subscription.created':
-      console.log(`Subscription was created`)
-      // Handle the subscription created event here
-      // ...
-      break
-    case 'subscription.active':
-      console.log(`Subscription was activated`)
-      // Handle the subscription active event here
-      // ...
-      break
-    case 'subscription.updated':
-      console.log(`Subscription was updated`)
-      // Handle the subscription updated event here
-      // ...
+      handleSubscriptionCreated(event.data)
       break
     case 'subscription.canceled':
-      console.log(`Subscription was canceled`)
-      // Handle the subscription canceling event here
-      // ...
+      handleSubscriptionCanceled(event.data)
       break
     default:
-      console.log(`Unhandled event type.`)
       break
   }
 
@@ -212,3 +237,241 @@ app.post('/webhook', async (req, res) => {
 })
 
 app.listen(3000, () => console.log('Running on port 3000'))
+
+/***************************************** Handlers ***************************************************/
+
+/**
+ * Handler should be called when you are asked to sign a charge request.
+ * @param diagonal Diagonal SDK instance
+ * @param signatureRequest The signature request event data
+ */
+async function handleSignatureChargeRequest(diagonal, signatureRequest) {
+  // 1: Extract charge payload and optionally verify charge request
+  const charge = signatureRequest.data.charge
+
+  //2: Use your signing key and attest to the charge request
+  const ecdsaSignature = diagonal.signatures.sign(signatureRequest, signingKey)
+
+  // 3: Capture the charge request
+  await diagonal.charges.capture(charge.id, ecdsaSignature)
+}
+
+/**
+ * Charge confirmed
+ *
+ *  We recommend pivoting on `charge.confirmed` when handling the following subscription lifecycle events:
+ *
+ *   - S1: Subscription creation charge successful e.g. Month 1 Alice subscribes 10 USDC
+ *   - S2: Subscription due charge successful e.g Month 2 charge Alice 10 USDC
+ *   - S3: Free trial converting
+ *   - S4: Subscription update charge successful e.g. Update Alice subscription to 20 USDC
+ *   - S5: Subscription cancel charge successful e.g. Cancel Alice subscription with due amount
+ *   - S6: Subscription past due charge successful e.g. Previous failed charge to Alice has now succeeded
+ *
+ * @param charge The charge object received in the event
+ */
+async function handleChargeConfirmed(charge) {
+  /*
+    ////////////////////////////////// Database code - rewrite yourself /////////////////////////////////////////
+      
+    ```
+      // Read the subscription from your database
+      const subscriptionInDatabase = SubscriptionTable.findOne({
+        diagonalSubscriptionId: charge.subscription_id,
+      })
+
+      if (!subscriptionInDatabase) return;
+
+      // Handle free trials converting (S3 ✅)
+      if (subscriptionInDatabase.status === 'trailing') {
+        
+        // Step 1: Update subscription to active 
+        SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
+
+        // Step 2: Optionally send invoice and store charges locally
+        // ...
+
+        return
+      }
+        
+    ```
+  */
+
+  // Handle past due charge successful (S6 ✅)
+  if (charge.attempt_count > 1) {
+    /*    
+      ```
+        // Step 1: Update subscription to active 
+        SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
+
+        // Step 2: Optionally send invoice and store charges locally
+        // ...
+
+        return
+      ```
+    */
+  }
+  switch (charge.reason) {
+    case 'subscription_creation': // S1 ✅
+    case 'subscription_due': // S2 ✅
+    case 'subscription_update': // S4 ✅
+    case 'subscription_cancel': // S5 ✅
+      /*
+        You may want to do the following:
+        - Send an invoice to your customer.
+        - Store charges in your DB.
+      */
+      break
+
+    default:
+      break
+  }
+}
+
+/**
+ * Subscription created
+ *
+ * We recommend pivoting on `subscription.created`, to handle the case when a checkout is a completed.
+ * Use this event to provide feedback though the UI, and create a new subscription in your database.
+ *
+ * @param subscription The subscription object received in the event
+ */
+async function handleSubscriptionCreated(subscription) {
+  /*
+      Find the user in your database using the `customer_id` or `reference`, specified on the subscription object:
+
+      ```
+        const user = UserTable.findOne({
+          diagonalCustomerId: subscription.customer_id!,
+        })
+      ```
+
+      Create a new subscription in your database:
+    
+      ```
+        SubscriptionTable.create({
+          userId: user.id,
+          status: 'active',
+          diagonalSubscriptionId: subscription.id,
+          planId: subscription.reference,
+        })
+      ```
+
+  */
+}
+
+/**
+ * Charge attempt failed
+ *
+ * @param charge The charge object received in the event
+ */
+async function handleChargeAttemptFailed(charge) {
+  /*
+    You may want to notify your user that the subscription charge failed, 
+    based on the failure reason specified in `charge.last_attempt_failure_reason`
+
+    NOTE: charge will be re-attempted at `charge.next_attempt_at`
+  */
+
+  switch (charge.last_attempt_failure_reason) {
+    case 'insufficient_allowance':
+      // Notify the user to increase their spending allowance on subscriptions.diagonal.finance
+      break
+    case 'insufficient_balance':
+      // Notify the user to fund their wallet
+      break
+    default:
+      break
+  }
+}
+
+/**
+ * Charge failed
+ *
+ *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
+ *
+ *   - S1: Subscription creation failed
+ *
+ *  DISCLAIMER:
+ *  `charge.failed` can fire in other scenarios e.g. "maximum number of retry attempts reached" or "address blacklist usdc".
+ *  We recommend handling these scenarios in `handleSubscriptionCanceled`.
+ *
+ * @param charge The charge object received in the event
+ */
+async function handleChargeFailed(charge) {
+  if (charge.reason === 'subscription_creation') {
+    /*
+      Handle subscription creation failed (S1 ✅)
+
+      1: Remove diagonal subscription entry from your database
+      ```
+        SubscriptionTable.deleteOne({ diagonalSubscriptionId: charge.subscription_id })
+      ```
+
+      2: Ask user to resubscribe by creating a new checkout session - optionally notifying them why charge failed.  
+         Use `charge.last_attempt_failure_reason` to specify reason for charge failure.
+         e.g. "insufficient_balance" or "insufficient_allowance".
+    */
+  }
+}
+
+/**
+ * Subscription canceled
+ *
+ * This handler should be called when a subscription.canceled event is received.
+ *
+ * When you receive this event, the subscription has already been canceled.
+ * This can either happen when you cancel the subscription through the UI or API,
+ * or when the subscription is canceled automatically due to a failed payment.
+ *
+ * @param subscription The subscription object received in the event
+ */
+async function handleSubscriptionCanceled(subscription) {
+  /*
+    You may want to do the following:
+
+    1: Update status in the subscription table to canceled:
+      ```
+        SubscriptionTable.update(subscriptionToUpdate.id, { status: 'canceled' })
+      ```
+    
+    2: Notify user that the their subscription has been canceled, for a reason specified in `subscription.cancel_reason`. 
+      e.g. "max_charge_attempts_reached" or "address_blacklisted_by_usdc"
+
+    3: Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
+
+  */
+}
+
+/********************************** Database overview ********************************************** */
+
+/* 
+  **OVERVIEW**
+  In the above handlers we have been referencing a `Subscription` and `User` relational database tables. These tables 
+  are meant to provide a high level example for how to handle the subscription lifecycle using Diagonal. Note, you are 
+  of course free to use non-relational databases.
+  
+  We recommend you keep track of the following attributes in your database of choice:
+  
+  **Subscription Table**
+    ...
+
+    status: 'active' | 'canceling' | 'canceled' | 'trailing' | 'created' | 'past_due'
+    diagonalSubscriptionId: string // Reference the Diagonal subscription id
+    planId: string // ID of the plan or product the user has subscribed to
+    userId: string // Relation to your user table
+    
+    ...
+  
+  **User Table**
+    ...
+
+    diagonalCustomerId: string // Reference the Diagonal customer id
+
+    ...
+
+  IMPORTANT:
+  * Keep track of the subscription status locally to avoid making requests to Diagonal API and risk hitting the rate limits.
+  * Keep track of Diagonal customer ids so you associate webhook events with customers.
+
+*/
