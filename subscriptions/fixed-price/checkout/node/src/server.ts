@@ -65,7 +65,7 @@ const premiumPlan = {
  *                   We recommend you pass a Diagonal customer id when creating a checkout creation.
  *                   `customer_id` will help you link a paying subscriber to a completed checkout session.
  *
- *  - `reference`  : WHAT they are paying for
+ *  - `reference`  : WHAT they are subscribing to
  *                   We recommend you pass a `reference` for what the user is paying for on checkout creation.
  *                   Ideally this reference would refer to a unique product/plan/invoice id.
  *
@@ -125,7 +125,7 @@ app.post('/create-checkout-session/', async (req, res) => {
       interval_count: plan.intervalCount,
     },
     customer_id: customerId, // Who is subscribing
-    reference: plan.id, // What they are paying for
+    reference: plan.id, // What they are subscribing to
   })
 
   res.redirect(checkoutSession.url)
