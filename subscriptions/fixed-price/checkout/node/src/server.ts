@@ -37,7 +37,7 @@ const diagonal = new Diagonal(apiKey)
  * Plans
  * Since you will be integrating fixed price subscriptions
  * you will need some notion of plans/products, either defined locally, in your database,
- * or using an external provider.
+ * or using an external provider. In this example we choose to define plans locally.
  */
 const basicPlan = {
   id: '1',
@@ -139,6 +139,8 @@ app.post('/upgrade-subscription/:id', async (req, res) => {
   */
 
   const subscriptionId = req.params.id
+  const plan = req.body.plan === 'basic' ? basicPlan : premiumPlan
+
   const updatedSubscription = await diagonal.subscriptions.update(
     subscriptionId,
     {
@@ -150,8 +152,12 @@ app.post('/upgrade-subscription/:id', async (req, res) => {
     },
   )
 
-  // TODO: update after db schema
-  // NOTE: You may want to update the subscription entity in your database
+  /*
+    If using plans you may want to update the planId on the DB subscription entity
+    ```
+      SubscriptionTable.update(subscriptionId, { planId: premiumPlan.id })
+    ```
+  */
 
   res.sendStatus(200)
 })
@@ -172,10 +178,14 @@ app.post('/cancel-subscription/:id', async (req, res) => {
     },
   )
 
-  // TODO: update after db schema
-  // NOTE: You may want to update the subscription entity in your database
-  // If `end_of_period` == true, update DB subscription status to `canceling`.
-  // If `end_of_period` == false, update DB subscription status to `canceled`.
+  /*
+    If using plans you may want to update the planId on the DB subscription entity.
+    If `end_of_period` == true, update DB subscription status to `canceling`.
+    If `end_of_period` == false, update DB subscription status to `canceled`.
+    ```
+      SubscriptionTable.update(subscriptionId, { status: '...' })
+    ```
+  */
 
   res.sendStatus(200)
 })
@@ -286,12 +296,10 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
       if (!subscriptionInDatabase) return;
 
       // Handle free trials converting (S3 ✅)
-      if (subscriptionInDatabase.status === SubscriptionStatus.Trailing) {
+      if (subscriptionInDatabase.status === 'trailing') {
         
         // Step 1: Update subscription to active 
-        SubscriptionTable.update(subscriptionInDatabase.id, {
-          status: SubscriptionStatus.Active,
-        })
+        SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
 
         // Step 2: Optionally send invoice and store charges locally
         // ...
@@ -307,9 +315,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     /*    
       ```
         // Step 1: Update subscription to active 
-        SubscriptionTable.update(subscriptionInDatabase.id, {
-          status: SubscriptionStatus.Active,
-        })
+        SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
 
         // Step 2: Optionally send invoice and store charges locally
         // ...
@@ -360,7 +366,7 @@ async function handleSubscriptionCreated(
       ```
         SubscriptionTable.create({
           userId: user.id,
-          status: SubscriptionStatus.Active,
+          status: 'active',
           diagonalSubscriptionId: subscription.id,
           planId: subscription.reference,
         })
@@ -409,12 +415,10 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
  */
 async function handleChargeFailed(charge: Charge): Promise<void> {
   if (charge.reason === 'subscription_creation') {
-    // Handle subscription creation failed (S1 ✅)
     /*
-      You may want to do the following:
+      Handle subscription creation failed (S1 ✅)
 
       1: Remove diagonal subscription entry from your database
-
       ```
         SubscriptionTable.deleteOne({ diagonalSubscriptionId: charge.subscription_id })
       ```
@@ -443,11 +447,9 @@ async function handleSubscriptionCanceled(
   /*
     You may want to do the following:
 
-    1: Update entry in the subscription table to status canceled:
+    1: Update status in the subscription table to canceled:
       ```
-        SubscriptionTable.update(subscriptionToUpdate.id, {
-          status: SubscriptionStatus.Canceled,
-        })
+        SubscriptionTable.update(subscriptionToUpdate.id, { status: 'canceled' })
       ```
     
     2: Notify user that the their subscription has been canceled, for a reason specified in `subscription.cancel_reason`. 
@@ -458,24 +460,35 @@ async function handleSubscriptionCanceled(
   */
 }
 
-/********************************** Database quick overview ********************************************** */
+/********************************** Database overview ********************************************** */
 
 /* 
-  TODO: In this section it would be nice to have an overview of the schema's associated with the User and Subscriptions table
+  **OVERVIEW**
+  In the above handlers we have been referencing a `Subscription` and `User` relational database tables. These tables 
+  are meant to provide a high level example for how to handle the subscription lifecycle using Diagonal. Note, you are 
+  of course free to use non-relational databases.
   
-  SubscriptionTable is one-to-many with UserTable
+  We recommend you keep track of the following attributes in your database of choice:
   
   **Subscription Table**
-  status
-  - active
-  - canceling
-  - canceled
-  - trailing
+    ...
 
+    status: 'active' | 'canceling' | 'canceled' | 'trailing' | 'created' | 'past_due'
+    diagonalSubscriptionId: string // Reference the Diagonal subscription id
+    planId: string // ID of the plan or product the user has subscribed to
+    userId: string // Relation to your user table
+    
+    ...
+  
   **User Table**
+    ...
 
+    diagonalCustomerId: string // Reference the Diagonal customer id
 
-  DISCLAIMER:
-  * Keep track of teh subscription status locally to avoid Diagonal rate limits
+    ...
+
+  IMPORTANT:
+  * Keep track of the subscription status locally to avoid Diagonal rate limits.
+  * Keep track of Diagonal customer ids so you associate webhook events with customers.
 
 */
