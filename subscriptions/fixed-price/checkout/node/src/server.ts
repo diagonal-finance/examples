@@ -61,7 +61,7 @@ const premiumPlan = {
  * Checkout session
  *
  *  IMPORTANT fields
- *  - `customer_id`: WHO is paying
+ *  - `customer_id`: WHO is subscribing
  *                   We recommend you pass a Diagonal customer id on checkout creation.
  *                   `customer_id` will help you link a paying subscriber to a completed checkout session.
  *
@@ -71,7 +71,7 @@ const premiumPlan = {
  *
  *
  *  NOTE: `customer_id` and `reference` will be available in the `subscription.created` webhook event.
- *         This will help you verify WHO paid and WHAT they paid for.
+ *         This will help you verify WHO subscribed and WHAT they paid for.
  */
 app.post('/create-checkout-session/', async (req, res) => {
   /* 
@@ -124,7 +124,7 @@ app.post('/create-checkout-session/', async (req, res) => {
       interval: plan.interval,
       interval_count: plan.intervalCount,
     },
-    customer_id: customerId, // Who is paying
+    customer_id: customerId, // Who is subscribing
     reference: plan.id, // What they are paying for
   })
 
