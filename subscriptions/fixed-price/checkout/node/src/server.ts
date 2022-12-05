@@ -134,7 +134,7 @@ app.post('/create-checkout-session/', async (req, res) => {
 app.post('/upgrade-subscription/:id', async (req, res) => {
   /*
     You can upgrade a subscription by updating the subscription's amount and/or interval.
-    The subscription will be updated immediately, if a charge is required it will be automatically created.
+    The subscription will be updated immediately, if a a prorated charge is required, it will be created and processed automatically.
     Refer to: https://docs.diagonal.finance/docs/upgrade-or-downgrade-subscriptions
   */
 
