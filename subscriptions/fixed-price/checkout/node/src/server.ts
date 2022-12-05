@@ -62,7 +62,7 @@ const premiumPlan = {
  *
  *  IMPORTANT fields
  *  - `customer_id`: WHO is subscribing
- *                   We recommend you pass a Diagonal customer id on checkout creation.
+ *                   We recommend you pass a Diagonal customer id when creating a checkout creation.
  *                   `customer_id` will help you link a paying subscriber to a completed checkout session.
  *
  *  - `reference`  : WHAT they are paying for
@@ -108,7 +108,7 @@ app.post('/create-checkout-session/', async (req, res) => {
 
   let customerId // diagonalCustomer
 
-  // If you are selling multiple products/service, pass the product id from your frontend
+  // If you are selling multiple products/services, pass the product id from your frontend
   const plan = req.body.plan === 'basic' ? basicPlan : premiumPlan
 
   const checkoutSession = await diagonal.checkout.sessions.create({
