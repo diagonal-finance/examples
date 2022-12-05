@@ -370,33 +370,6 @@ async function handleSubscriptionCreated(
 }
 
 /**
- * Charge failed
- *
- *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
- *
- *   - S1: Subscription creation failed
- *
- *  DISCLAIMER:
- *  `charge.failed` can fire in other scenarios e.g. "maximum number of retry attempts reached" or "address blacklist usdc".
- *  We recommend handling these scenarios in `handleSubscriptionCanceled`.
- *
- * @param charge The charge object received in the event
- */
-async function handleChargeFailed(charge: Charge): Promise<void> {
-  if (charge.reason === 'subscription_creation') {
-    // Handle subscription creation failed (S1 ✅)
-    /*
-      You may want to do the following:
-      - Remove diagonal subscription entry from your database
-      - Notify user that the charge failed for reason specified in `charge.last_attempt_failure_reason`
-        e.g. "insufficient_balance" or "insufficient_allowance".
-      - Ask them to enter the checkout flow again.
-
-    */
-  }
-}
-
-/**
  * Charge attempt failed
  *
  * @param charge The charge object received in the event
@@ -418,6 +391,38 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
       break
     default:
       break
+  }
+}
+
+/**
+ * Charge failed
+ *
+ *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
+ *
+ *   - S1: Subscription creation failed
+ *
+ *  DISCLAIMER:
+ *  `charge.failed` can fire in other scenarios e.g. "maximum number of retry attempts reached" or "address blacklist usdc".
+ *  We recommend handling these scenarios in `handleSubscriptionCanceled`.
+ *
+ * @param charge The charge object received in the event
+ */
+async function handleChargeFailed(charge: Charge): Promise<void> {
+  if (charge.reason === 'subscription_creation') {
+    // Handle subscription creation failed (S1 ✅)
+    /*
+      You may want to do the following:
+
+      1: Remove diagonal subscription entry from your database
+
+      ```
+        SubscriptionTable.deleteOne({ diagonalSubscriptionId: charge.subscription_id })
+      ```
+
+      2: Ask user to enter the checkout flow again, notify why charge failed.  
+         Use `charge.last_attempt_failure_reason` to specify reason for charge failure.
+         e.g. "insufficient_balance" or "insufficient_allowance".
+    */
   }
 }
 
@@ -449,6 +454,7 @@ async function handleSubscriptionCanceled(
       e.g. "max_charge_attempts_reached" or "address_blacklisted_by_usdc"
 
     3: Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
+
   */
 }
 
