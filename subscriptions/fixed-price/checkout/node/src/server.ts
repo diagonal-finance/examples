@@ -106,7 +106,7 @@ app.post('/create-checkout-session/', async (req, res) => {
       ```
   */
 
-  let customerId // diagonalCustomer.id
+  let customerId // diagonalCustomer
 
   // If you are selling multiple products/service, pass the product id from your frontend
   const plan = req.body.plan === 'basic' ? basicPlan : premiumPlan
@@ -338,11 +338,8 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
 /**
  * Subscription created
  *
- * We recommend pivoting on `subscription.created` when handling the following subscription lifecycle events:
- *
- *  - S1: Checkout session completed
- *
- * Use this event if you want to provide feedback though the UI, and create a new subscription in your database.
+ * We recommend pivoting on `subscription.created`, to handle the case when a checkout is a completed.
+ * Use this event to provide feedback though the UI, and create a new subscription in your database.
  *
  * @param subscription The subscription object received in the event
  */
@@ -350,8 +347,7 @@ async function handleSubscriptionCreated(
   subscription: DiagonalSubscription,
 ): Promise<void> {
   /*
-      Find the user in your database using the Diagonal
-      customer id:
+      Find the user in your database using the `customer_id` or `reference`, specified on the subscription object:
 
       ```
         const user = UserTable.findOne({
@@ -359,7 +355,7 @@ async function handleSubscriptionCreated(
         })
       ```
 
-      Create a new subscription in your database"
+      Create a new subscription in your database:
     
       ```
         SubscriptionTable.create({
@@ -369,10 +365,6 @@ async function handleSubscriptionCreated(
           planId: subscription.reference,
         })
       ```
-
-      Note: The reference in the received subscription is the same as the one you provided
-      in the checkout session used by the user. You can use this to link the
-      subscription to any other entity in your database, e.g. a plan, a product, etc.
 
   */
 }
@@ -414,19 +406,15 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
     You may want to notify your user that the subscription charge failed, 
     based on the failure reason specified in `charge.last_attempt_failure_reason`
 
-    Charge will be re-attempted at `charge.next_attempt_at`
+    NOTE: charge will be re-attempted at `charge.next_attempt_at`
   */
 
   switch (charge.last_attempt_failure_reason) {
     case 'insufficient_allowance':
-      /*
-          Notify the user to increase their spending allowance on subscriptions.diagonal.finance
-      */
+      // Notify the user to increase their spending allowance on subscriptions.diagonal.finance
       break
     case 'insufficient_balance':
-      /*
-          Notify the user to fund their wallet
-      */
+      // Notify the user to fund their wallet
       break
     default:
       break
@@ -475,7 +463,7 @@ async function handleSubscriptionCanceled(
 
       subscription.cancel_reason
       "max_charge_attempts_reached"
-      "address_blacklisted_by_usdc"
+      ""
 
 
     // TODO: Question how do you get the reason for canceled event
@@ -487,7 +475,7 @@ async function handleSubscriptionCanceled(
   */
 }
 
-/********************************** Database overview ********************************************** */
+/********************************** Database quick overview ********************************************** */
 
 /* 
   TODO: In this section it would be nice to have an overview of the schema's associated with the User and Subscriptions table
@@ -495,6 +483,11 @@ async function handleSubscriptionCanceled(
   SubscriptionTable is one-to-many with UserTable
   
   **Subscription Table**
+  status
+  - active
+  - canceling
+  - canceled
+  - trailing
 
   **User Table**
 
