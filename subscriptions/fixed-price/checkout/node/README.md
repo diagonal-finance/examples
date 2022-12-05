@@ -2,11 +2,15 @@
 
 An [Express server](http://expressjs.com) implementation.
 
+---
+
 ## Inline database snippets
 
-Throughout the example integrations we reference a `Subscription` and `User` relational database tables. These tables
-are meant to provide a high level example, for how to handle the subscription lifecycle using Diagonal. Note, you are
-of course free to use non-relational databases.
+Throughout the example integrations we inline short "database snippets", which are meant to provide a high level guide 
+for how to use Diagonal alongside your existing database. These snippets should be rewritten by yourself.
+
+You are free to use any relational or non-relational database you like, but the current examples reference 
+`Subscription` and `User` relational database tables. 
 
 We recommend keeping track of the following attributes in your database of choice:
 
