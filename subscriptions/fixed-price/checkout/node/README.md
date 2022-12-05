@@ -38,6 +38,8 @@ IMPORTANT:
 - Keep track of the subscription status locally to avoid making requests to Diagonal API and risk hitting the rate limits.
 - Keep track of Diagonal customer ids so you associate webhook events with customers.
 
+---
+
 ## Requirements
 
 - Node v10+
