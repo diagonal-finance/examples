@@ -150,6 +150,7 @@ app.post('/upgrade-subscription/:id', async (req, res) => {
     },
   )
 
+  // TODO: update after db schema
   // NOTE: You may want to update the subscription entity in your database
 
   res.sendStatus(200)
@@ -171,9 +172,10 @@ app.post('/cancel-subscription/:id', async (req, res) => {
     },
   )
 
+  // TODO: update after db schema
   // NOTE: You may want to update the subscription entity in your database
-  // If `end_of_period` field is set to true, update DB subscription status to `canceling`.
-  // If `end_of_period` field is set to false, update DB subscription status to `canceled`.
+  // If `end_of_period` == true, update DB subscription status to `canceling`.
+  // If `end_of_period` == false, update DB subscription status to `canceled`.
 
   res.sendStatus(200)
 })
@@ -227,7 +229,6 @@ app.post('/webhook', async (req, res) => {
       handleSubscriptionCanceled(event.data)
       break
     default:
-      console.warn(`Unhandled event type.`)
       break
   }
 
@@ -318,14 +319,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     */
   }
   switch (charge.reason) {
-    // TODO: Should we create subscription in DB here?
-    // If no what status do we use in subscription.created?
-    // What is probability of subscription created and charge attempt failing?
-    // Do we have any guarantees
-
     case 'subscription_creation': // S1 ✅
-      break
-
     case 'subscription_due': // S2 ✅
     case 'subscription_update': // S4 ✅
     case 'subscription_cancel': // S5 ✅
@@ -348,8 +342,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
  *
  *  - S1: Checkout session completed
  *
- * Use this event if you want to provide feedback though the UI,
- * and create a new subscription in your database.
+ * Use this event if you want to provide feedback though the UI, and create a new subscription in your database.
  *
  * @param subscription The subscription object received in the event
  */
@@ -391,9 +384,8 @@ async function handleSubscriptionCreated(
  *
  *   - S1: Subscription creation failed
  *
- *  DISCLAIMER: `charge.failed` can fire in other scenarios e.g.
- *  "maximum number of retry attempts reached" or "address blacklist".
- *
+ *  DISCLAIMER:
+ *  `charge.failed` can fire in other scenarios e.g. "maximum number of retry attempts reached" or "address blacklist".
  *  We recommend handling these scenarios in `handleSubscriptionCanceled`.
  *
  * @param charge The charge object received in the event
@@ -403,12 +395,10 @@ async function handleChargeFailed(charge: Charge): Promise<void> {
     // Handle subscription creation failed (S1 ✅)
     /*
       You may want to do the following:
+      - Remove diagonal subscription entry from your database
       - Notify user that the charge failed for reason specified in `charge.last_attempt_failure_reason`
         e.g. "insufficient_balance" or "insufficient_allowance".
-       
-        => Redirect the user to new a checkout session.
-
-      - Remove diagonal subscription entry from your database
+      - Ask them to enter the checkout flow again.
 
     */
   }
@@ -482,6 +472,10 @@ async function handleSubscriptionCanceled(
     You may want to do the following:
       - Notify user that the their subscription has been canceled.
       - Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
+
+      subscription.cancel_reason
+      "max_charge_attempts_reached"
+      "address_blacklisted_by_usdc"
 
 
     // TODO: Question how do you get the reason for canceled event
