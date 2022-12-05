@@ -270,7 +270,7 @@ async function handleSignatureChargeRequest(
 /**
  * Charge confirmed
  *
- *  We recommend pivoting on `charge.confirmed` when handling the following subscription lifecycle events:
+ *  We recommend listening to `charge.confirmed` when handling the following subscription lifecycle events:
  *
  *   - S1: Subscription creation charge successful e.g. Month 1 Alice subscribes 10 USDC
  *   - S2: Subscription due charge successful e.g Month 2 charge Alice 10 USDC
@@ -342,7 +342,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
 /**
  * Subscription created
  *
- * We recommend pivoting on `subscription.created`, to handle the case when a checkout is a completed.
+ * We recommend listening to `subscription.created`, to handle the case when a checkout is a completed.
  * Use this event to provide feedback though the UI, and create a new subscription in your database.
  *
  * @param subscription The subscription object received in the event
@@ -401,7 +401,7 @@ async function handleChargeAttemptFailed(charge: Charge): Promise<void> {
 /**
  * Charge failed
  *
- *  We recommend pivoting on `charge.failed` when handling the following subscription lifecycle events:
+ *  We recommend listening to `charge.failed` when handling the following subscription lifecycle events:
  *
  *   - S1: Subscription creation failed
  *
