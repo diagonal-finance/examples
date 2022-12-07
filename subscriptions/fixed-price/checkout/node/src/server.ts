@@ -118,6 +118,7 @@ app.post('/create-checkout-session/', async (req, res) => {
     payment_options: [
       {
         tokens: plan.tokens,
+        chains: plan.chains,
       },
     ],
     subscription: {
