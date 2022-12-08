@@ -372,7 +372,6 @@ async function handleSubscriptionCreated(
       ```
 
   */
-  console.log(subscription)
 }
 
 /**
@@ -458,7 +457,6 @@ async function handleSubscriptionCanceled(
     3: Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
 
   */
-  console.log(subscription)
 }
 
 /********************************** Database overview ********************************************** */
