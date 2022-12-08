@@ -57,6 +57,7 @@ If you are looking for a way to send automated emails to your customers here are
 - [AWS SES](https://docs.aws.amazon.com/ses/latest/dg/send-email.html)
 - [Mailgun](https://www.mailgun.com/)
 - [Postmark](https://postmarkapp.com/)
+- [Customer IO](https://customer.io/)
 
 ---
 
