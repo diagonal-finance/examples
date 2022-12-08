@@ -344,7 +344,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
  * Subscription created
  *
  * We recommend listening to `subscription.created`, to handle the case when a checkout is a completed.
- * Use this event to provide feedback though the UI, and create a new subscription in your database.
+ * In this handler we use `subscription.created` to provision access to your service, by creating an entry in your database.
  *
  * @param subscription The subscription object received in the event
  */
