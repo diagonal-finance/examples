@@ -79,13 +79,13 @@ npm install
 Typescript:
 
 ```
-npm start-ts
+npm run start-ts
 ```
 
 or Javascript:
 
 ```
-pnpm start
+npm start
 ```
 
 3. You can interact with the server started at `localhost:3000`
