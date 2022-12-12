@@ -218,24 +218,23 @@ app.post('/webhook', async (req, res) => {
     
   */
   switch (event.type) {
-    case 'signature.charge.request': {
+    case 'signature.charge.request':
       await handleSignatureChargeRequest(diagonal, event.data)
       break
-    }
     case 'charge.confirmed':
-      handleChargeConfirmed(event.data)
+      await handleChargeConfirmed(event.data)
       break
     case 'charge.failed':
-      handleChargeFailed(event.data)
+      await handleChargeFailed(event.data)
       break
     case 'charge.attempt_failed':
-      handleChargeAttemptFailed(event.data)
+      await handleChargeAttemptFailed(event.data)
       break
     case 'subscription.created':
-      handleSubscriptionCreated(event.data)
+      await handleSubscriptionCreated(event.data)
       break
     case 'subscription.canceled':
-      handleSubscriptionCanceled(event.data)
+      await handleSubscriptionCanceled(event.data)
       break
     default:
       break
