@@ -299,7 +299,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
         // Step 1: Update subscription to active 
         SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
 
-        // Step 2: Optionally send invoice and store charges locally
+        // Step 2: Optionally send receipt and store charges locally
         // ...
 
         return
@@ -315,7 +315,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
         // Step 1: Update subscription to active 
         SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
 
-        // Step 2: Optionally send invoice and store charges locally
+        // Step 2: Optionally send receipt and store charges locally
         // ...
 
         return
@@ -329,7 +329,7 @@ async function handleChargeConfirmed(charge: Charge): Promise<void> {
     case 'subscription_cancel': // S5 ✅
       /*
         You may want to do the following:
-        - Send an invoice to your customer.
+        - Send an receipt to your customer.
         - Store charges in your DB.
       */
       break
@@ -371,7 +371,7 @@ async function handleSubscriptionCreated(
       ```
 
   */
-  console.log(subscription);
+  console.log(subscription)
 }
 
 /**
@@ -457,7 +457,7 @@ async function handleSubscriptionCanceled(
     3: Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
 
   */
- console.log(subscription);
+  console.log(subscription)
 }
 
 /********************************** Database overview ********************************************** */
