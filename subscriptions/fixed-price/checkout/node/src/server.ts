@@ -42,8 +42,6 @@ const diagonal = new Diagonal(apiKey)
 const basicPlan = {
   id: '1',
   amount: '10',
-  tokens: [Token.DAI, Token.USDC],
-  chains: [Chain.ETHEREUM, Chain.POLYGON],
   interval: 'month' as const,
   intervalCount: 1,
 }
@@ -51,8 +49,6 @@ const basicPlan = {
 const premiumPlan = {
   id: '2',
   amount: '50',
-  tokens: [Token.DAI, Token.USDC],
-  chains: [Chain.ETHEREUM, Chain.POLYGON],
   interval: 'month' as const,
   intervalCount: 1,
 }
@@ -115,18 +111,12 @@ app.post('/create-checkout-session/', async (req, res) => {
     cancel_url: 'https://example.com/cancel',
     success_url: 'https://example.com/success',
     amount: plan.amount,
-    payment_options: [
-      {
-        tokens: plan.tokens,
-        chains: plan.chains,
-      },
-    ],
     subscription: {
       interval: plan.interval,
       interval_count: plan.intervalCount,
     },
-    customer_id: customerId, // Who is subscribing
-    reference: plan.id, // What they are subscribing to
+    customer_id: customerId, // Optional: Diagonal Customer ID subscribing
+    reference: plan.id, // Optional: What they are subscribing to
   })
 
   res.redirect(checkoutSession.url)
