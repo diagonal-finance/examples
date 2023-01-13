@@ -290,7 +290,7 @@ async function handleChargeConfirmed(charge) {
         SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
 
         // Step 2: Optionally send receipt and store charges locally
-        // ...
+        // e.g. sample emails: https://docs.diagonal.finance/docs/dunning-flows#successful-charges---receipts
 
         return
       }
@@ -306,7 +306,7 @@ async function handleChargeConfirmed(charge) {
         SubscriptionTable.update(subscriptionInDatabase.id, { status: 'active' })
 
         // Step 2: Optionally send receipt and store charges locally
-        // ...
+        // e.g. sample emails: https://docs.diagonal.finance/docs/dunning-flows#successful-charges---receipts
 
         return
       ```
@@ -320,6 +320,8 @@ async function handleChargeConfirmed(charge) {
       /*
         You may want to do the following:
         - Send an receipt to your customer.
+          e.g. sample emails: https://docs.diagonal.finance/docs/dunning-flows#successful-charges---receipts
+
         - Store charges in your DB.
       */
       break
@@ -413,8 +415,7 @@ async function handleChargeFailed(charge) {
       ```
 
       2: Ask user to resubscribe by creating a new checkout session - optionally notifying them why charge failed.  
-         Use `charge.last_attempt_failure_reason` to specify reason for charge failure.
-         e.g. "insufficient_balance" or "insufficient_allowance".
+         e.g. sample email templates: https://docs.diagonal.finance/docs/dunning-flows#failure-during-subscription-creation
     */
   }
 }
@@ -440,7 +441,7 @@ async function handleSubscriptionCanceled(subscription) {
       ```
     
     2: Notify user that the their subscription has been canceled, optionally specifying reason in `subscription.cancel_reason`. 
-      e.g. "max_charge_attempts_reached" or "address_blacklisted_by_usdc"
+      e.g. sample email templates: https://docs.diagonal.finance/docs/dunning-flows#subscription-cancelation
 
     3: Initiate any flow required to handle uncollected revenue, as charge will not be re-attempted.
 
