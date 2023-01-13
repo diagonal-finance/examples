@@ -376,11 +376,13 @@ async function handleChargeAttemptFailed(charge) {
   */
 
   switch (charge.last_attempt_failure_reason) {
-    case 'insufficient_allowance':
-      // Consult the sample email templates: https://docs.diagonal.finance/docs/dunning-flows to notify the user to increase their spending allowance on subscriptions.diagonal.finance
+    case 'insufficient_spending_allowance':
+      // Notify the user to increase their spending allowance on subscriptions.diagonal.finance
+      // e.g. sample email templates: https://docs.diagonal.finance/docs/dunning-flows#insufficient-spending-allowance
       break
     case 'insufficient_balance':
-      // Consult the sample email templates: https://docs.diagonal.finance/docs/dunning-flows to notify the user to fund their wallet
+      // Notify the user to fund their wallet
+      // e.g. sample email templates: https://docs.diagonal.finance/docs/dunning-flows#insufficient-balance
       break
     default:
       break
