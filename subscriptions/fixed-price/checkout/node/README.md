@@ -50,6 +50,8 @@ When handling webhook events such as 'charge.attempt_failed' or 'charge.confirme
 
 For example, when a charge attempt has failed, in order to reduce churn you may want to notify your customers about the failed charge, why it failed (`charge.last_attempt_failure_reason`), when it will be rescheduled (`charge.next_attempt_at`).
 
+We provide a series of simple [email templates](https://docs.diagonal.finance/docs/dunning-flows) for your convenience that demonstrate how you can use Diagonal webhook events to extract relevant information and notify your customers accordingly.
+
 If you are looking for a way to send automated emails, here are some popular options:
 
 - [Twilio SendGrid](https://www.twilio.com/en-us/sendgrid/email-api)
