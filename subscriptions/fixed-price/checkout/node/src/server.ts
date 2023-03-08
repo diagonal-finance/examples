@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Diagonal, Token, Chain, Constants, DiagonalError } from 'diagonal'
+import { Diagonal, Constants, DiagonalError } from 'diagonal'
 import type {
   Event,
   Subscription as DiagonalSubscription,
@@ -115,7 +115,11 @@ app.post('/create-checkout-session/', async (req, res) => {
       interval: plan.interval,
       interval_count: plan.intervalCount,
     },
-    customer_id: customerId, // Optional: Diagonal Customer ID subscribing
+    customer: {
+      // Optional: Creation of customer for that specific Checkout session
+      id: customerId, // Optional: You can provide your own customer ID
+      name: 'John',
+    },
     reference: plan.id, // Optional: What they are subscribing to
   })
 
