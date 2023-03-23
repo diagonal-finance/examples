@@ -1,12 +1,6 @@
 ## Diagonal with Stripe integration example
 
-Example integration repo with Stripe.
-
-
-
 https://user-images.githubusercontent.com/18260238/227162786-a691a6c6-b270-41fc-80f7-d0f9eadf1273.mp4
-
-
 
 ## Installation
 
