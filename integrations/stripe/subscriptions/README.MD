@@ -62,11 +62,11 @@ When running both client and server, you are now ready to use the app running in
 2. Select your plan
 3. Select if you want to pay with crypto or fiat
 4. Proceed to complete a checkout
-    - For Fiat, you can use the test card number:
+    - For Fiat, you can use the test card number ([more details](https://stripe.com/docs/testing)):
         - Number: 4242 4242 4242 4242.
         - Valid future date, such as 12/34.
         - Any three-digit CVC.
-        - Use any value you like for other form fields.
+        - Use any value you like for other form field.
     - For Crypto, if you're in test environment, you'll be able to mint the necessary tokens automatically during the session in order for you to complete it.
-5. 🎉
+5. 🚀
 

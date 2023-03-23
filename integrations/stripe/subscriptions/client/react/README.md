@@ -4,7 +4,7 @@ This example shows how you can build a subscription integration with Stripe usin
 
 ## How to run locally
 
-In order to start only the client, you'll need to: 
+In order to start the client, you'll need to: 
 
 ### Install dependencies
 
@@ -12,10 +12,12 @@ In order to start only the client, you'll need to:
 npm install --prefix client/react
 ```
 
-### Start
+### Run
 
 ```bash
 npm start --prefix client/react
 ```
 
 Your default browser should now open with the client being served from `http://localhost:3000/`.
+
+Note that you should also run the server in order to have the complete sample integration. Follow the guide at [integrations/stripes/subscriptions](./../../README.md#how-to-run-locally)
