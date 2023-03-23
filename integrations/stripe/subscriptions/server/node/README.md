@@ -1,4 +1,4 @@
-## Diagonal with Stripe integration example
+## Diagonal with Stripe integration server example
 
 Example backend integration repo with Stripe using Typescript and a NodeJS Express server.
 
