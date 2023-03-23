@@ -87,7 +87,6 @@ You can either do it through the Dashboard UI or via the API:
 - `invoice.payment_failed`
 - `customer.subscription.deleted`
 - `customer.subscription.trial_will_end`
-- `payment_method.attached`
 - `invoice.created`
 - `invoice.finalized`
 
