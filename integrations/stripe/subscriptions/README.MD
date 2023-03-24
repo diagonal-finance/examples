@@ -16,14 +16,16 @@ The example shows how to integrate [Diagonal](https://docs.diagonal.finance) wit
 - [Using the app](#using-the-app)
 - [Design decisions](#design-decisions)
 
-https://user-images.githubusercontent.com/18260238/227162786-a691a6c6-b270-41fc-80f7-d0f9eadf1273.mp4
-
 ## Features
 
 - Create a subscription and settle it in fiat or crypto.
 - Add more payment methods, either card or a wallet.
 - Change the default payment method.
 - Cancel a subscription.
+
+### Demo
+
+https://user-images.githubusercontent.com/18260238/227162786-a691a6c6-b270-41fc-80f7-d0f9eadf1273.mp4
 
 ## How to run locally
 
