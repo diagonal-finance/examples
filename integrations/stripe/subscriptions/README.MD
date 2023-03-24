@@ -5,14 +5,14 @@ The example shows how to integrate [Diagonal](https://docs.diagonal.finance) wit
 - [Features](#features)
   * [Demo](#demo)
 - [How to run locally](#how-to-run-locally)
-  * [Client](#client)
-    + [Install dependencies](#install-dependencies)
-    + [Start](#start)
   * [Server](#server)
     + [1. Install dependencies](#1-install-dependencies)
     + [2. Setup webhooks](#2-setup-webhooks)
     + [3. Environment variables](#3-environment-variables)
     + [4. Start](#4-start)
+  * [Client](#client)
+    + [Install dependencies](#install-dependencies)
+    + [Start](#start)
 - [Using the app](#using-the-app)
 - [Design decisions](#design-decisions)
 
@@ -29,23 +29,7 @@ https://user-images.githubusercontent.com/18260238/227162786-a691a6c6-b270-41fc-
 
 ## How to run locally
 
-You'll need to start both client and server. The client is a React app, and the server is a Node.js app.
-
-### Client
-
-#### Install dependencies
-
-```bash
-npm install --prefix client/react
-```
-
-#### Start
-
-```bash
-npm start --prefix client/react
-```
-
-Your default browser should now open with the client being served from `http://localhost:3000/`.
+You'll need to start both [server](./server/node/README.md) and [client](./client/react/README.md). The server is a NodeJS Express server, and the client is a React app. 
 
 ### Server
 
@@ -78,6 +62,22 @@ npm run start --prefix server/node/
 ```
 
 The server will being served from `http://localhost:4242/`.
+
+### Client
+
+#### Install dependencies
+
+```bash
+npm install --prefix client/react
+```
+
+#### Start
+
+```bash
+npm start --prefix client/react
+```
+
+Your default browser should now open with the client being served from `http://localhost:3000/`.
 
 ## Using the app
 
