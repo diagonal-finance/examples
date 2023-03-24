@@ -35,6 +35,7 @@ npm install
 ### Requirements
 
 - Node v16+
+- NPM v8+
 
 ### 1. Forward webhook requests to localhost
 
@@ -156,6 +157,8 @@ Use the `secret` value to initialize the `DIAGONAL_WEBHOOK_SECRET` environment v
 
 ### 4. Environment variables
 
+Copy the `.env.example` file to `.env` and fill in the following environment variables:
+
 ```
 DIAGONAL_WEBHOOK_SECRET=<secret from webhook config created response>
 DIAGONAL_API_SECRET=<Diagonal api key secret>
@@ -167,7 +170,7 @@ STRIPE_API_SECRET=<Stripe api key secret>
 ### 5. Start
 
 ```bash
-pnpm run start
+npm run start
 ```
 
 ## Endpoints
