@@ -64,7 +64,13 @@ pnpm install
 npm install
 ```
 
+---
+
 ## Running the server
+
+### Requirements
+
+- Node v10+
 
 ### 1. Forward webhook requests to localhost
 
@@ -110,7 +116,6 @@ curl https://api.stripe.com/v1/webhook_endpoints \
   -d "enabled_events[]"="invoice.payment_failed" \
   -d "enabled_events[]"="customer.subscription.deleted" \
   -d "enabled_events[]"="customer.subscription.trial_will_end" \
-  -d "enabled_events[]"="payment_method.attached" \
   -d "enabled_events[]"="invoice.created" \
   -d "enabled_events[]"="invoice.finalized"
 ```
@@ -132,7 +137,6 @@ This will return the webhook config instance with the signing secret inside the 
 		"invoice.payment_failed",
 		"customer.subscription.deleted",
 		"customer.subscription.trial_will_end",
-		"payment_method.attached",
 		"invoice.created",
 		"invoice.finalized"
 	],
@@ -155,7 +159,6 @@ curl https://api.test.diagonal.finance/v1/webhook/configs \
   -H 'X-API-Key: secret_test_UJxZOTVdP0qHdP0qHrmw2yAJIIi5Y6dgrD' \
   -d url="https://6d0c-125-72-19-24.eu.ngrok.io/diagonal/webhook" \
   -d "events[]"="checkout_session.complete_request" \
-  -d "events[]"="setup_session.completed" \
   -d "events[]"="charge.attempt_failed" \
   -d "events[]"="charge.failed" \
   -d "events[]"="charge.confirmed" \
@@ -171,7 +174,6 @@ curl https://api.test.diagonal.finance/v1/webhook/configs \
 	"created_at": 1677510462,
 	"events": [
 		"checkout_session.complete_request",
-		"setup_session.completed",
 		"charge.attempt_failed",
 		"charge.failed",
 		"charge.confirmed",
@@ -212,7 +214,7 @@ These are the endpoints exposed through the Express server.
 
 #### `POST /diagonal/checkout`:
 
-Creates a Diagonal checkout and redirects the request to the session URL.
+Creates a Diagonal checkout and returns the session URL to redirect the client to.
 
 ##### Parameters:
 
@@ -226,7 +228,7 @@ Creates a Diagonal checkout and redirects the request to the session URL.
 
 #### `POST /stripe/checkout`:
 
-Creates a Stripe checkout and redirects the request to the session URL.
+Creates a Stripe checkout and returns the session URL to redirect the client to.
 
 ##### Parameters:
 
@@ -242,11 +244,11 @@ Creates a Stripe checkout and redirects the request to the session URL.
 
 #### `POST /stripe/add-card`:
 
-Adds a card using a Stripe Checkout Session with mode setup. Redirects the request to the session URL.
+Adds a card using a Stripe Checkout Session with mode setup. Returns the session URL to redirect the client to.
 
 #### `POST /diagonal/add-wallet`:
 
-Adds a new wallet using a Diagonal Setup Session. Redirects the request to the session URL.
+Adds a new wallet using a Diagonal Setup Session. Returns the session URL to redirect the client to.
 
 #### `POST /set-default-payment-method`:
 
@@ -276,7 +278,7 @@ Lists all subscriptions for the given user.
 
 #### `POST /cancel-subscription`:
 
-Cancels a given subscription
+Cancels a given subscription through Stripe.
 
 ##### Parameters:
 
@@ -288,7 +290,7 @@ Cancels a given subscription
 
 #### `POST /update-subscription`:
 
-Updates a subscription to the price id.
+Updates a subscription through Stripe to provided price id.
 
 ##### Parameters:
 
@@ -303,7 +305,7 @@ Updates a subscription to the price id.
 
 #### `POST /create-customer`:
 
-Creates a new Stripe customer and sets the auth cookie.
+Creates a new customer in the fictional database and Stripe, as well as setting the auth cookie.
 
 ##### Parameters:
 
@@ -320,3 +322,24 @@ Handles Stripe webhooks events.
 #### `POST /diagonal/webhook`:
 
 Handles Diagonal webhooks events.
+
+---
+
+## Notify
+
+When handling webhook events such as `charge.attempt_failed` or `charge.confirmed`, Diagonal recommends you notify your customer about the status of their subscription.
+
+For example, when a charge attempt has failed, in order to reduce churn you may want to notify your customers about the failed charge, why it failed (`charge.last_attempt_failure_reason`), when it will be rescheduled (`charge.next_attempt_at`).
+
+We provide a series of simple [email templates](https://docs.diagonal.finance/docs/dunning-flows) for your convenience that demonstrate how you can use Diagonal webhook events to extract relevant information and notify your customers accordingly.
+
+If you are looking for a way to send automated emails, here are some popular options:
+
+- [Twilio SendGrid](https://www.twilio.com/en-us/sendgrid/email-api)
+- [Mailchimp](https://mailchimp.com/en-gb/features/transactional-email/?currency=EUR)
+- [AWS SES](https://docs.aws.amazon.com/ses/latest/dg/send-email.html)
+- [Mailgun](https://www.mailgun.com/)
+- [Postmark](https://postmarkapp.com/)
+- [Customer IO](https://customer.io/)
+
+---

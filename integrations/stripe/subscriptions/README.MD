@@ -1,10 +1,21 @@
 ## Diagonal with Stripe integration example
 
+The example shows how to integrate [Diagonal](https://docs.diagonal.finance) with [Stripe](https://stripe.com/docs) to create a subscription service handling both fiat and crypto payments. 
+
+## Features
+
+- Create a subscription and settle it in fiat or crypto.
+- Add more payment methods, either card or a wallet.
+- Change the default payment method.
+- Cancel a subscription.
+
+### Demo
+
 https://user-images.githubusercontent.com/18260238/227162786-a691a6c6-b270-41fc-80f7-d0f9eadf1273.mp4
 
 ## How to run locally
 
-You'll need to start both client and server.
+You'll need to start both client and server. The client is a React app, and the server is a Node.js app.
 
 ### Client
 
@@ -69,4 +80,16 @@ When running both client and server, you are now ready to use the app running in
         - Use any value you like for other form field.
     - For Crypto, if you're in test environment, you'll be able to mint the necessary tokens automatically during the session in order for you to complete it.
 5. 🚀
+
+## Design decisions
+
+Some further explanation on certain design decisions made within the repo:
+
+- **Diagonal acts only as a payment processor.** Stripe handles all information regarding subscriptions, customers, etc. Diagonal is only used to settle the payments, these being triggered by Stripe creation of invoices.
+- **Management of the payment methods is done on your end**. Whenever the user adds a new payment method - either via Stripe or Diagonal - the default config is set on the demo database customer model, which is later used for subsequent payments - either fiat or crypto.
+    - That being said, another approach if you want to remove this complexity in your end, is to store directly in Stripe customer metadata, and then update it whenever the user changes it.
+- **Simple auth.** In order to reduce the overhead of auth - given this is just an example integration, as production authentication would vary substantially - it has been simplified to be cookie based.
+- **Stripe customer ID as customer ID.** We’ve relied on Stripe customer ID as the unique ID for your customer in Diagonal. That being said, you can use your internal ID as long as you keep the relationship to the Stripe customer - to reconcile between your system and Stripe’s.
+    **Note:** We enable creation of customers in our end with an ID of your choice, so will not be required to store Diagonal customer ID if you don’t want to.
+
 

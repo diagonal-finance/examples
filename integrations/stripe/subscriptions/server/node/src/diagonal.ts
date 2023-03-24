@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Constants, Diagonal, Event } from 'diagonal'
 import { Request, Response } from 'express'
 import { database } from '.'
@@ -42,6 +43,18 @@ export async function handleDiagonalRequest(
     switch (event.type) {
         case 'checkout_session.complete_request':
             {
+                /**
+                 *  When a organization is meant to be used along with Stripe, hosted checkout sessions will not create a
+                 *  Subscription on completion. Instead, this event will be emitted during completion in order to
+                 *  allow you to create the necessary entities on Stripe before showing the success UI to the user.
+                 *
+                 *  Once you create the subscription on Stripe, on this handler, it will automatically attempt to consolidate the first
+                 *  payment, and thus start the invoice flow: `invoice.created` => `invoice.finalized` => `invoice.paid`,
+                 *  as shown in the Stripe webhook section.
+                 *
+                 *  You can find a detailed diagram of how this flow looks at:
+                 *  https://github.com/diagonal-finance/merchant-examples/blob/master/integrations/stripe/subscriptions/server/node/images/checkout_session.complete_request.png
+                 */
                 const checkoutSession = event.data
                 if (typeof checkoutSession.customer_id !== 'string') return
                 if (typeof checkoutSession.payment_method_id !== 'string')
@@ -56,6 +69,8 @@ export async function handleDiagonalRequest(
                 )
                 if (paymentMethod === null) return
 
+                // We store the payment method information in the database
+                // to be used during the payment method management.
                 await database.customer.update(checkoutSession.customer_id, {
                     paymentMethodId: checkoutSession.payment_method_id,
                     paymentMethodType: 'crypto',
@@ -63,6 +78,8 @@ export async function handleDiagonalRequest(
 
                 await stripe.customers.update(checkoutSession.customer_id, {
                     // [Optional] We store the payment method information in the Stripe customer
+                    // This is useful for debugging purposes, and also to be able to show the payment method
+                    // information in the Stripe dashboard.
                     metadata: {
                         diag_pm_id: paymentMethod.id,
                         diag_pm_token: paymentMethod.wallet.token,
@@ -111,6 +128,7 @@ export async function handleDiagonalRequest(
                                 charge.transaction.explorer_url,
                             ['chain']: charge.chain,
                             ['token']: charge.token,
+                            ['address']: charge.source_address,
                         },
                     },
                     { idempotencyKey: 'update-' + charge.id },
@@ -127,7 +145,9 @@ export async function handleDiagonalRequest(
                     },
                 )
 
-                // [Optional]: Send invoice
+                // [Optional]: Manually force Stripe to send invoice to the customer
+                // attached to the invoice. This is not necessary, as Stripe will send
+                // the invoice automatically once it's marked as paid.
                 await stripe.invoices.sendInvoice(charge.reference, {
                     idempotencyKey: 'send-' + charge.id,
                 })
@@ -135,9 +155,19 @@ export async function handleDiagonalRequest(
             break
         case 'charge.attempt_failed':
             {
+                /**
+                 * When a failed attempt to charge a user happens, you'll receive this event. By default, Diagonal
+                 * attempts every 24h during 21 days to process the charge. Once the limit is reached, you'll
+                 * receive a `chage.failed` event.
+                 *
+                 * Check the dunning flow section for more details
+                 * https://docs.diagonal.finance/docs/dunning-flows
+                 */
                 const charge = event.data
                 if (typeof charge.customer_id !== 'string') return
 
+                const nextAttemptAt = charge.next_attempt_at
+                const failureReason = charge.last_attempt_failure_reason
                 // Optional: Send email for failed charge.
                 // Note: Diagonal can also take care these emails if customer email is provided on creation - for instance during the checkout session creation.
             }
@@ -150,10 +180,15 @@ export async function handleDiagonalRequest(
                  *
                  * You can either create a new charge, if you want to extend further the window, or mark the invoice
                  * as uncollectible, as no further attempts will be made to settle the charge.
+                 *
+                 * Check the dunning flow section for more details
+                 * https://docs.diagonal.finance/docs/dunning-flows
                  */
                 const charge = event.data
                 // Reference should be defined with the invoice id.
                 if (typeof charge.reference !== 'string') return
+
+                const failureReason = charge.last_attempt_failure_reason
 
                 await stripe.invoices.markUncollectible(charge.reference, {
                     idempotencyKey: 'uncollectible-' + charge.id,

@@ -91,6 +91,9 @@ export async function handleStripeRequest(
                 // We're only interested in invoices created with `send_invoice` collection method.
                 // Fiat subscriptions will contain the `charge_automatically`.
                 if (invoice.collection_method === 'charge_automatically') {
+                    // Because we're storing the default payment method for the customer
+                    // in our database, we need to initialise it when the subscription
+                    // is created.
                     if (invoice.billing_reason === 'subscription_create') {
                         // Retrieve the payment intent used to pay the subscription
                         const payment_intent =
