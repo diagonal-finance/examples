@@ -2,6 +2,8 @@
 
 Example backend integration repo with Stripe using Typescript and a NodeJS Express server.
 
+You can find the client example interacting with this server at [integrations/stripe/subscriptions/client/react](./../../client/react/README.md).
+
 - [Installation](#installation)
   * [Install dependencies](#install-dependencies)
 - [Running the server](#running-the-server)
@@ -21,8 +23,12 @@ Example backend integration repo with Stripe using Typescript and a NodeJS Expre
   * [Customer](#customer)
 - [Notify your customers](#notify-your-customers)
 
-
 ## Installation
+
+### Requirements
+
+- Node v16+
+- NPM v8+
 
 ### Install dependencies
 
@@ -31,11 +37,6 @@ npm install
 ```
 
 ## Running the server
-
-### Requirements
-
-- Node v16+
-- NPM v8+
 
 ### 1. Forward webhook requests to localhost
 

@@ -6,7 +6,9 @@ The client is dependent on the server, which is a Node.js app. Follow the guide 
 
 ## How to run locally
 
-In order to start the client, you'll need to: 
+### Requirements
+
+- NPM v8+
 
 ### Install dependencies
 
@@ -14,7 +16,7 @@ In order to start the client, you'll need to:
 npm install
 ```
 
-### Run
+### Start
 
 ```bash
 npm start
