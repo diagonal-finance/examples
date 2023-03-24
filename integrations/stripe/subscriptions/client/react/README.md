@@ -11,13 +11,13 @@ In order to start the client, you'll need to:
 ### Install dependencies
 
 ```bash
-npm install --prefix client/react
+npm install
 ```
 
 ### Run
 
 ```bash
-npm start --prefix client/react
+npm start
 ```
 
 Your default browser should now open with the client being served from `http://localhost:3000/`.

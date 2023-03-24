@@ -2,16 +2,28 @@
 
 The example shows how to integrate [Diagonal](https://docs.diagonal.finance) with [Stripe](https://stripe.com/docs) to create a subscription service handling both fiat and crypto payments. 
 
+- [Features](#features)
+  * [Demo](#demo)
+- [How to run locally](#how-to-run-locally)
+  * [Client](#client)
+    + [Install dependencies](#install-dependencies)
+    + [Start](#start)
+  * [Server](#server)
+    + [1. Install dependencies](#1-install-dependencies)
+    + [2. Setup webhooks](#2-setup-webhooks)
+    + [3. Environment variables](#3-environment-variables)
+    + [4. Start](#4-start)
+- [Using the app](#using-the-app)
+- [Design decisions](#design-decisions)
+
+https://user-images.githubusercontent.com/18260238/227162786-a691a6c6-b270-41fc-80f7-d0f9eadf1273.mp4
+
 ## Features
 
 - Create a subscription and settle it in fiat or crypto.
 - Add more payment methods, either card or a wallet.
 - Change the default payment method.
 - Cancel a subscription.
-
-### Demo
-
-https://user-images.githubusercontent.com/18260238/227162786-a691a6c6-b270-41fc-80f7-d0f9eadf1273.mp4
 
 ## How to run locally
 
@@ -90,6 +102,7 @@ Some further explanation on certain design decisions made within the repo:
     - That being said, another approach if you want to remove this complexity in your end, is to store directly in Stripe customer metadata, and then update it whenever the user changes it.
 - **Simple auth.** In order to reduce the overhead of auth - given this is just an example integration, as production authentication would vary substantially - it has been simplified to be cookie based.
 - **Stripe customer ID as customer ID.** We’ve relied on Stripe customer ID as the unique ID for your customer in Diagonal. That being said, you can use your internal ID as long as you keep the relationship to the Stripe customer - to reconcile between your system and Stripe’s.
+
     **Note:** We enable creation of customers in our end with an ID of your choice, so will not be required to store Diagonal customer ID if you don’t want to.
 
 

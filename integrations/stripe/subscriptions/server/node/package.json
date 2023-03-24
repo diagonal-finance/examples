@@ -1,10 +1,10 @@
 {
-    "name": "diagonal-backend-examples",
+    "name": "diagonal-stripe-subscriptions-server",
     "version": "1.0.0",
-    "description": "Repository containing diagonal backend integration examples",
     "main": "./src/server.ts",
     "author": "Diagonal Finance",
     "license": "MIT",
+    "private": true,
     "scripts": {
         "build": "tsc",
         "build:watch": "tsc --watch",

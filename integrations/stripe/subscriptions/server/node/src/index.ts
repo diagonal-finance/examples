@@ -178,10 +178,6 @@ app.post(
     }),
 )
 
-/**
- * Select from the available payment methods, cards or wallets,
- * the default one to pay for the subscription.
- */
 app.post(
     '/set-default-payment-method',
     handler(async (req, res) => {

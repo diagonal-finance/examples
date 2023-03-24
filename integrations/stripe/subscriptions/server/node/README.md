@@ -3,74 +3,38 @@
 Example backend integration repo with Stripe using Typescript and a NodeJS Express server.
 
 - [Installation](#installation)
-  - [pnpm](#pnpm)
-    - [Install pnpm](#install-pnpm)
-    - [Install dependencies](#install-dependencies)
-  - [npm](#npm)
-    - [Install dependencies](#install-dependencies-1)
+  * [Install dependencies](#install-dependencies)
 - [Running the server](#running-the-server)
-  - [1. Forward webhook requests to localhost](#1-forward-webhook-requests-to-localhost)
-  - [2. Configure Stripe webhook config](#2-configure-stripe-webhook-config)
-    - [Dashboard UI](#dashboard-ui)
-    - [API](#api)
-  - [3. Configure Diagonal webhook config](#3-configure-diagonal-webhook-config)
-  - [4. Environment variables](#4-environment-variables)
-  - [5. Start](#5-start)
+  * [Requirements](#requirements)
+  * [1. Forward webhook requests to localhost](#1-forward-webhook-requests-to-localhost)
+  * [2. Configure Stripe webhook config](#2-configure-stripe-webhook-config)
+    + [Dashboard UI](#dashboard-ui)
+    + [API](#api)
+  * [3. Configure Diagonal webhook config](#3-configure-diagonal-webhook-config)
+  * [4. Environment variables](#4-environment-variables)
+  * [5. Start](#5-start)
 - [Endpoints](#endpoints)
-  - [Checkout](#checkout)
-    - [`POST /diagonal/checkout`:](#post-diagonal-checkout)
-      - [Parameters:](#parameters-)
-    - [`POST /stripe/checkout`:](#post-stripe-checkout)
-      - [Parameters:](#parameters-1)
-  - [Payment methods](#payment-methods)
-    - [`POST /stripe/add-card`:](#post-stripe-add-card)
-    - [`POST /diagonal/add-wallet`:](#post-diagonal-add-wallet)
-    - [`POST /set-default-payment-method`:](#post-set-default-payment-method)
-      - [Parameters:](#parameters-2)
-    - [`GET /list-payment-methods`:](#get-list-payment-methods)
-  - [Subscriptions](#subscriptions)
-    - [`GET /subscriptions`:](#get-subscriptions)
-    - [`POST /cancel-subscription`:](#post-cancel-subscription)
-      - [Parameters:](#parameters-3)
-    - [`POST /update-subscription`:](#post-update-subscription)
-      - [Parameters:](#parameters-4)
-  - [Customer](#customer)
-    - [`POST /create-customer`:](#post-create-customer)
-      - [Parameters:](#parameters-5)
-    - [`POST /stripe/webhook`:](#post-stripe-webhook)
-    - [`POST /diagonal/webhook`:](#post-diagonal-webhook)
+  * [Checkout](#checkout)
+  * [Payment methods](#payment-methods)
+  * [Account](#account)
+  * [Subscriptions](#subscriptions)
+  * [Customer](#customer)
+- [Notify your customers](#notify-your-customers)
+
 
 ## Installation
 
-### pnpm
-
-#### Install pnpm
-
-```bash
-wget -qO- https://get.pnpm.io/install.sh | sh -
-```
-
-#### Install dependencies
-
-```bash
-pnpm install
-```
-
-### npm
-
-#### Install dependencies
+### Install dependencies
 
 ```bash
 npm install
 ```
 
----
-
 ## Running the server
 
 ### Requirements
 
-- Node v10+
+- Node v16+
 
 ### 1. Forward webhook requests to localhost
 
@@ -270,13 +234,21 @@ Defines what's the preferred payment method for a specific user - either card or
 
 Lists the customer payment methods, either cards or wallets.
 
+### Account
+
+#### `GET /account`:
+
+Returns the account information for the given user.
+- Payment methods, both crypto and fiat.
+- Subscriptions.
+
 ### Subscriptions
 
 #### `GET /subscriptions`:
 
 Lists all subscriptions for the given user.
 
-#### `POST /cancel-subscription`:
+#### `POST /subscription/cancel`:
 
 Cancels a given subscription through Stripe.
 
@@ -288,7 +260,7 @@ Cancels a given subscription through Stripe.
 }
 ```
 
-#### `POST /update-subscription`:
+#### `POST /subscription/update`:
 
 Updates a subscription through Stripe to provided price id.
 
@@ -305,7 +277,7 @@ Updates a subscription through Stripe to provided price id.
 
 #### `POST /create-customer`:
 
-Creates a new customer in the fictional database and Stripe, as well as setting the auth cookie.
+Creates a new customer in the fictional database and Stripe, while also setting the auth cookie.
 
 ##### Parameters:
 
@@ -323,9 +295,9 @@ Handles Stripe webhooks events.
 
 Handles Diagonal webhooks events.
 
----
+--
 
-## Notify
+## Notify your customers
 
 When handling webhook events such as `charge.attempt_failed` or `charge.confirmed`, Diagonal recommends you notify your customer about the status of their subscription.
 
@@ -342,4 +314,4 @@ If you are looking for a way to send automated emails, here are some popular opt
 - [Postmark](https://postmarkapp.com/)
 - [Customer IO](https://customer.io/)
 
----
+--
