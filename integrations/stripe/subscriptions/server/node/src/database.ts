@@ -1,6 +1,6 @@
 /**
  *
- * This represents a fictional Database.
+ * This represents a fictional in-memory Database just for demonstration purposes.
  *
  * It is meant to illustracte the database models potentially required
  * and how would they be interacting accross an integration.
