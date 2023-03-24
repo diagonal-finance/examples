@@ -39,10 +39,10 @@ Follow the guide located at [server/node](./server/node/README.md#running-the-se
 Setup in a `.env` file the `./server/node` folder, with the following variables:
 
 ```
-DIAGONAL_WEBHOOK_SECRET=<secret from webhook config created response>
+DIAGONAL_WEBHOOK_SECRET=<secret from the webhook config creation response>
 DIAGONAL_API_SECRET=<Diagonal api key secret>
 DIAGONAL_SIGNER_PRIVATE_KEY=<signer private key to sign charge attestations>
-STRIPE_WEBHOOK_SECRET=<secret from webhook config created response>
+STRIPE_WEBHOOK_SECRET=<secret from the webhook config creation response>
 STRIPE_API_SECRET=<Stripe api key secret>
 ```
 
