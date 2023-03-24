@@ -15,10 +15,7 @@ const stripe = new Stripe(environment.STRIPE_API_SECRET, {
     apiVersion: '2022-11-15',
 })
 
-const diagonal = new Diagonal(
-    environment.DIAGONAL_API_SECRET,
-    'https://api.staging.diagonal.finance',
-)
+const diagonal = new Diagonal(environment.DIAGONAL_API_SECRET)
 
 // Simulate a fictional database
 export const database = new Database()
