@@ -58,6 +58,7 @@ You can either do it through the Dashboard UI or via the API:
 - `invoice.payment_succeeded`
 - `invoice.payment_failed`
 - `customer.subscription.deleted`
+- `customer.subscription.created`
 - `customer.subscription.trial_will_end`
 - `invoice.created`
 - `invoice.finalized`
@@ -81,6 +82,7 @@ curl https://api.stripe.com/v1/webhook_endpoints \
   -d "enabled_events[]"="invoice.payment_succeeded" \
   -d "enabled_events[]"="invoice.payment_failed" \
   -d "enabled_events[]"="customer.subscription.deleted" \
+  -d "enabled_events[]"="customer.subscription.created" \
   -d "enabled_events[]"="customer.subscription.trial_will_end" \
   -d "enabled_events[]"="invoice.created" \
   -d "enabled_events[]"="invoice.finalized"
@@ -102,6 +104,7 @@ This will return the webhook config instance with the signing secret inside the 
 		"invoice.payment_succeeded",
 		"invoice.payment_failed",
 		"customer.subscription.deleted",
+		"customer.subscription.created",
 		"customer.subscription.trial_will_end",
 		"invoice.created",
 		"invoice.finalized"
