@@ -1,4 +1,4 @@
-## Diagonal with Stripe integration example
+## Accept crypto and fiat subscriptions with Diagonal and Stripe
 
 The example shows how to integrate [Diagonal](https://docs.diagonal.finance) with [Stripe](https://stripe.com/docs) to create a subscription service handling both fiat and crypto payments. 
 
