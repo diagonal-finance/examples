@@ -1,6 +1,6 @@
 ## Accept crypto and fiat subscriptions with Diagonal and Stripe
 
-The example shows how to integrate [Diagonal](https://docs.diagonal.finance) with [Stripe](https://stripe.com/docs) to create a subscription service handling both fiat and crypto payments. 
+The example shows how to integrate [Diagonal](https://docs.diagonal.finance) with [Stripe](https://stripe.com/docs) to create a subscription service handling both fiat and crypto payments 🚀.
 
 It includes a NodeJS [server](./server/node/README.md) written in Typescript with Exprees, and a Javascript React [client](./client/react/README.md). The server handles both Diagonal and Stripe webhooks, as well exposing a REST API consumed by the client.
 
