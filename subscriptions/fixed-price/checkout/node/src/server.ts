@@ -12,9 +12,9 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 const isEnvConfigured =
-  process.env.DIAGONAL_API_KEY &&
-  process.env.DIAGONAL_SIGNING_PRIVATE_KEY &&
-  process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET
+  process.env.DIAGONAL_API_SECRET &&
+  process.env.DIAGONAL_SIGNER_PRIVATE_KEY &&
+  process.env.DIAGONAL_WEBHOOK_SECRET
 if (!isEnvConfigured)
   throw new Error(
     'The .env file is not configured. Follow the instructions in the root folder readme to configure the .env file.',
@@ -26,10 +26,10 @@ app.use(express.json()) // to support JSON-encoded bodies
 app.use(express.urlencoded({ extended: true })) // to support URL-encoded bodies
 
 // Use test api key for development and live api key for production
-const apiKey = process.env.DIAGONAL_API_KEY as string
-const signingKey = process.env.DIAGONAL_SIGNING_PRIVATE_KEY as string
+const apiKey = process.env.DIAGONAL_API_SECRET as string
+const signingKey = process.env.DIAGONAL_SIGNER_PRIVATE_KEY as string
 // Use test webhook secret for development and live webhook secret for production
-const endpointSecret = process.env.DIAGONAL_WEBHOOK_ENDPOINT_SECRET as string
+const endpointSecret = process.env.DIAGONAL_WEBHOOK_SECRET as string
 
 const diagonal = new Diagonal(apiKey)
 

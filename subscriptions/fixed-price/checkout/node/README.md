@@ -63,20 +63,33 @@ If you are looking for a way to send automated emails, here are some popular opt
 
 ---
 
-## Requirements
+## Running the server
 
-- Node v10+
-- [Configured .env file](../../../../README.md#env-config)
+### Requirements
 
-## How to run
+- Node v16+
+- NPM v8+
 
-1. Install dependencies
+### 1. Install dependencies
 
 ```
 npm install
 ```
 
-2. Run the application:
+### 2. Add `.env` configuration file
+
+Simply copy the `.env.example` file into `.env`, and then populate it with the appropriate values.
+
+Description:
+
+`DIAGONAL_API_SECRET` - Key necessary for making authorized requests to the Diagonal backend. Initailly will be provided by the Diagonal team. You can learn more about how to get Diagonal API key [here](https://docs.diagonal.finance/docs/quickstart-setup#step-1-create-your-signer-key-pair).
+
+`DIAGONAL_SIGNER_PRIVATE_KEY` - Ethereum private key for signing incoming charge requests from the diagonal backend. To get more details, as well as learn how to create such key, please visit this [link](https://docs.diagonal.finance/docs/quickstart-setup#step-1-create-your-signer-key-pair).
+
+`DIAGONAL_WEBHOOK_SECRET` - Webhook endpoint secret key. You can obtain this key when creating a [webhook configuration](https://docs.diagonal.finance/docs/webhooks#configuration).
+
+
+### 3. Run the application:
 
 Typescript:
 
@@ -90,4 +103,6 @@ or Javascript:
 npm start
 ```
 
-3. You can interact with the server started at `localhost:3000`
+### 4. Interact with the server
+
+Server has started at `localhost:3000`. You can interact with the server using the following endpoints:
