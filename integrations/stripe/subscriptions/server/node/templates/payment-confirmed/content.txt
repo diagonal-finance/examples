@@ -1,0 +1,22 @@
+We received payment for your subscription.
+
+- {{organisation_name}}
+
+------------------------------------
+RECEIPT 
+
+ID: {{receipt_id}}
+{{#if invoice_id}}Invoice: {{invoice_id}}{{/if}}
+Total: {{amount}} {{currency}}
+Payment method: {{payment_method}}
+{{#if transaction_hash}}Transaction: 
+    - {{transaction_hash}}
+    - {{transaction_explorer_url}}
+{{/if}}
+{{#if payment_description}}Description: {{payment_description}}{{/if}}
+Date: {{charge_date}}
+------------------------------------
+
+Questions? Please contact {{organisation_email}}.
+
+{{organisation_legal_address}}

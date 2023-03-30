@@ -1,0 +1,13 @@
+Unfortunately we were unable to charge you {{amount}} {{token}}, 
+due to your wallet ({{chain}}:{{address}}) not having enough balance.
+
+We will attempt to charge your wallet again {{next_attempt_at}}, but in order to not lose your subscription 
+please top up your wallet with {{token}} in {{chain}}.
+
+- {{organisation_name}}
+
+------------------------------------
+
+Questions? Please contact {{organisation_email}}.
+
+{{organisation_legal_address}}

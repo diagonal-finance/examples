@@ -1,0 +1,10 @@
+Your trial ends {{#if trial_end}}in {{trial_end}}{{/if}}
+
+When your trial expires, you'll revert to our Free plan. 
+If you have paid features enabled, they will be paused.
+
+- {{organisation_name}}
+
+Questions? Please contact {{organisation_email}}.
+
+{{organisation_legal_address}}

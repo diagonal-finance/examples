@@ -1,0 +1,10 @@
+Your subscription has been cancelled because we were unable to charge
+your payment method after several attempts.
+
+- {{organisation_name}}
+
+------------------------------------
+
+Questions? Please contact {{organisation_email}}.
+
+{{organisation_legal_address}}
