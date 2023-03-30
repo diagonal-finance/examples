@@ -55,7 +55,7 @@ type ChargeAttemptFailedBalance = BaseTemplate<
         next_attempt_at: string
     }
 >
-type ChargeConfirmed = BaseTemplate<
+type PaymentSucceeded = BaseTemplate<
     Template.InvoicePaymentSucceeded,
     {
         amount: string
@@ -94,7 +94,7 @@ type InvoicePaymentFailed = BaseTemplate<
 >
 
 type TemplateData = {
-    [Template.InvoicePaymentSucceeded]: ChargeConfirmed['data']
+    [Template.InvoicePaymentSucceeded]: PaymentSucceeded['data']
     [Template.InvoicePaymentFailedCard]: InvoicePaymentFailed['data']
     [Template.InvoicePaymentFailedWalletAllowance]: ChargeAttemptFailedAllowance['data']
     [Template.InvoicePaymentFailedWalletBalance]: ChargeAttemptFailedBalance['data']
