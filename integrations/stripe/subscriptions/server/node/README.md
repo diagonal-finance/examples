@@ -306,11 +306,17 @@ Handles Diagonal webhooks events.
 
 ## Notify your customers
 
-When handling webhook events such as `charge.attempt_failed` or `charge.confirmed`, Diagonal recommends you notify your customer about the status of their subscription.
+When handling certain webhook events, you may want to notify your customers about the status of their subscription or the status of their payment, as well as provide them with the necessary information to take action (if necessary).
 
-For example, when a charge attempt has failed, in order to reduce churn you may want to notify your customers about the failed charge, why it failed (`charge.last_attempt_failure_reason`), when it will be rescheduled (`charge.next_attempt_at`).
+In this example repository, we've provided a fictional email client to illustrate at what point you can notify your customers, along with email templates in the `templates` folder as a starting point to build your own.
 
-We provide a series of simple [email templates](https://docs.diagonal.finance/docs/dunning-flows) for your convenience that demonstrate how you can use Diagonal webhook events to extract relevant information and notify your customers accordingly.
+The events that you may want to notify your customers about are:
+- **Invoice payment failed**: caused either due to Stripe card payment failing: `invoice.payment_failed`; or Diagonal wallet: `charge.attempt_failed`.
+- **Invoice payment succeeded**: when a payment is confirmed. For Stripe card payments being `invoice.payment_succeeded` and `charge.confirmed` for Diagonal wallets.
+- **Subscription canceled**: when a subscription is canceled, `customer.subscription.deleted`
+- **Subscription trial ending**: when a subscription trial is ending, `customer.subscription.trial_will_end`
+
+### Popular email providers
 
 If you are looking for a way to send automated emails, here are some popular options:
 
