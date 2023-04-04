@@ -311,10 +311,42 @@ When handling certain webhook events, you may want to notify your customers abou
 In this example repository, we've provided a fictional email client to illustrate at what point you can notify your customers, along with email templates in the `templates` folder as a starting point to build your own.
 
 The events that you may want to notify your customers about are:
-- **Invoice payment failed**: caused either due to Stripe card payment failing: `invoice.payment_failed`; or Diagonal wallet: `charge.attempt_failed`.
+- **Invoice payment failed**: caused either due to Stripe card payment failing: `invoice.payment_failed`; or Diagonal wallet: `charge.attempt_failed`. Examples:
+	<details>
+		<summary>Example email: Card </summary>
+		<IMG src="./images/emails/invoice-payment-failed-card.png"  alt="Invoice payment failed card"/>
+	</details>
+	<details>
+		<summary>Example email: Wallet with not enough allowance</summary>
+		<IMG src="./images/emails/invoice-payment-failed-wallet-allowance.png"  alt="Invoice payment failed wallet not enough allowance example email"/>
+	</details>
+	<details>
+		<summary>Example email: Wallet with not enough balance</summary>
+		<IMG src="./images/emails/invoice-payment-failed-wallet-balance.png"  alt="Invoice payment failed wallet not enough balance example email"/>
+	</details>
 - **Invoice payment succeeded**: when a payment is confirmed. For Stripe card payments being `invoice.payment_succeeded` and `charge.confirmed` for Diagonal wallets.
+	<details>
+		<summary>Example email</summary>
+		<IMG src="./images/emails/payment-confirmed.png"  alt="Payment confirmed example email"/>
+	</details>
 - **Subscription canceled**: when a subscription is canceled, `customer.subscription.deleted`
+	<details>
+		<summary>Example email: Wallet sanctioned</summary>
+		<IMG src="./images/emails/subscription-canceled-blacklisted.png"  alt="Subscription canceled blacklisted"/>
+	</details>
+	<details>
+		<summary>Example email: Canceled by user</summary>
+		<IMG src="./images/emails/subscription-canceled-user.png"  alt="Subscription canceled by user"/>
+	</details>
+	<details>
+		<summary>Example email: Payment failed</summary>
+		<IMG src="./images/emails/subscription-canceled-payment-failed.png"  alt="Subscription canceled by user"/>
+	</details>
 - **Subscription trial ending**: when a subscription trial is ending, `customer.subscription.trial_will_end`
+	<details>
+		<summary>Example email</summary>
+		<IMG src="./images/emails/subscription-trial-will-end.png"  alt="Subscription trial will end"/>
+	</details>
 
 ### Popular email providers
 
