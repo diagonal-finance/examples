@@ -1,7 +1,7 @@
 /**
  * This represents a fictional email service just for demonstration purposes.
  *
- * It is meant to illustracte how would an integration send emails, in the following cases:
+ * It is meant to illustrate how would an integration send emails, in the following cases:
  * - Subscription canceled due to blacklisting
  * - Subscription canceled due to payment failure
  * - Subscription canceled by user
