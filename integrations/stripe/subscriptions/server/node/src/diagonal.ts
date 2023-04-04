@@ -7,7 +7,7 @@ import { EmailClient } from './email'
 import { environment } from './environment'
 
 /*
- * Handling Diagonal events
+ * Handling Diagonal webhook events
  */
 export async function handleDiagonalRequest(
     request: Request,
