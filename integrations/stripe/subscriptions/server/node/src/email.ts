@@ -178,16 +178,6 @@ export class EmailClient {
         )
     }
 
-    // Show a short version of the address in the email
-    // E.g. 0x1234...7890
-    private static shortAddress(address: string) {
-        return (
-            address.substring(0, 6) +
-            '...' +
-            address.substring(address.length - 4)
-        )
-    }
-
     static async sendInvoicePaymentSuccessWallet(
         email: string,
         data: {
@@ -201,9 +191,6 @@ export class EmailClient {
         if (!charge.transaction) return
 
         const address = charge.source_address
-        // Show a short version of the address in the email
-        // E.g. 0x1234...7890
-        const shortAddress = this.shortAddress(address)
 
         this.sendEmail(
             {
@@ -214,7 +201,7 @@ export class EmailClient {
                     amount: invoice.amount_paid?.toString() ?? charge.amount,
                     currency: charge.token,
                     payment_description: invoice.description ?? undefined,
-                    payment_method: `Wallet ${charge.chain}:${shortAddress}`,
+                    payment_method: `Wallet ${charge.chain}:${address}`,
                     receipt_date: formatDistanceToNow(invoice.created * 1000),
                     receipt_id: invoice.receipt_number ?? charge.id,
                     transaction_hash: charge.transaction.hash,
@@ -239,9 +226,6 @@ export class EmailClient {
         if (!charge.next_attempt_at) return
 
         const address = charge.source_address
-        // This is just to show a short version of the address in the email
-        // E.g. 0x1234...7890
-        const shortAddress = this.shortAddress(address)
 
         // When 'address_blacklisted_by_usdc' is returned, the charge is
         // not retried. The charge.failed event is sent instead.
@@ -258,7 +242,7 @@ export class EmailClient {
                     amount: charge.amount.toString(),
                     token: charge.token,
                     chain: charge.chain,
-                    address: shortAddress,
+                    address,
                     next_attempt_at: formatDistanceToNow(
                         charge.next_attempt_at * 1000,
                     ),
