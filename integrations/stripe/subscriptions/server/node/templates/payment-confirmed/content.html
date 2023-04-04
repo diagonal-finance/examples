@@ -380,8 +380,8 @@
                         <p>Total: {{amount}} {{currency}}</p>
                         <p>Payment method: {{payment_method}}</p>
                         {{#if transaction_hash}} <p style="word-break: break-all; overflow-wrap: break-word;">Transaction: <a href="{{transaction_explorer_url}}">{{transaction_hash}}</a></p>{{/if}}
-                        {{#if payment_description}}Description: {{payment_description}}{{/if}}
-                        Date: {{receipt_date}}
+                        {{#if payment_description}}<p>Description: {{payment_description}}</p>{{/if}}
+                        <p>Date: {{receipt_date}}</p>
                       </td>
                     </tr>
                   </table>
