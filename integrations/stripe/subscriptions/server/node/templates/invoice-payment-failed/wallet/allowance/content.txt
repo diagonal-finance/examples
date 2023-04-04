@@ -2,8 +2,8 @@ Unfortunately we were unable to charge you {{amount}} {{token}},
 due to your wallet ({{chain}}:{{address}}) having an insufficient spending allowance.
 
 We will attempt to charge your wallet again {{next_attempt_at}}, and in order not to lose your subscription, 
-please increase your spending allowance using the Diagonal subscriptions dashboard:
-https://subscriptions.diagonal.finance/
+please increase your spending allowance using the Diagonal allowance dashboard:
+https://allowance.diagonal.finance/
 
 - {{organisation_name}}
 
