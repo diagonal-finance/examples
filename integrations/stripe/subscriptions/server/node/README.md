@@ -302,8 +302,6 @@ Handles Stripe webhooks events.
 
 Handles Diagonal webhooks events.
 
---
-
 ## Notify your customers
 
 When handling certain webhook events, you may want to notify your customers about the status of their subscription or the status of their payment, as well as provide them with the necessary information to take action (if necessary).
@@ -358,5 +356,3 @@ If you are looking for a way to send automated emails, here are some popular opt
 - [Mailgun](https://www.mailgun.com/)
 - [Postmark](https://postmarkapp.com/)
 - [Customer IO](https://customer.io/)
-
---
