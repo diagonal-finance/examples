@@ -1,0 +1,12 @@
+Unfortunately we were unable to charge you {{amount}} {{currency}}. 
+
+We will attempt to charge your card again{{#if next_attempt_at}} in {{next_attempt_at}}{{/if}}. If you don't want to lose 
+your subscription, please update your payment details in your account section.
+
+- {{organisation_name}}
+
+------------------------------------
+
+Questions? Please contact {{organisation_email}}.
+
+{{organisation_legal_address}}

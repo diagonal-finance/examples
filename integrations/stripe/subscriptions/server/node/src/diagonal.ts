@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Constants, Diagonal, Event } from 'diagonal'
 import { Request, Response } from 'express'
-import { database } from '.'
 import Stripe from 'stripe'
+import { database } from '.'
+import { EmailClient } from './email'
 import { environment } from './environment'
 
 /*
- *
- * Handling webhook events
- *
+ * Handling Diagonal webhook events
  */
 export async function handleDiagonalRequest(
     request: Request,
@@ -114,9 +113,14 @@ export async function handleDiagonalRequest(
 
                 // Reference has been set with the Stripe Invoice ID while creating the charge
                 if (typeof charge.reference !== 'string') return
+                if (typeof charge.customer_id !== 'string') return
 
                 // Confirmed Charges will always have a transaction
                 if (!charge.transaction) return
+
+                const customer = await database.customer.findById(
+                    charge.customer_id,
+                )
 
                 // [Optional]: We can add charge metadata to the invoice for any manual management
                 // through Stripe Dashboard
@@ -135,7 +139,7 @@ export async function handleDiagonalRequest(
                 )
 
                 // We mark the invoice as being paid in Stripe
-                await stripe.invoices.pay(
+                const invoice = await stripe.invoices.pay(
                     charge.reference,
                     {
                         paid_out_of_band: true,
@@ -145,12 +149,13 @@ export async function handleDiagonalRequest(
                     },
                 )
 
-                // [Optional]: Manually force Stripe to send invoice to the customer
-                // attached to the invoice. This is not necessary, as Stripe will send
-                // the invoice automatically once it's marked as paid.
-                await stripe.invoices.sendInvoice(charge.reference, {
-                    idempotencyKey: 'send-' + charge.id,
-                })
+                await EmailClient.sendInvoicePaymentSuccessWallet(
+                    customer.email,
+                    {
+                        invoice,
+                        charge,
+                    },
+                )
             }
             break
         case 'charge.attempt_failed':
@@ -166,10 +171,16 @@ export async function handleDiagonalRequest(
                 const charge = event.data
                 if (typeof charge.customer_id !== 'string') return
 
-                const nextAttemptAt = charge.next_attempt_at
-                const failureReason = charge.last_attempt_failure_reason
-                // Optional: Send email for failed charge.
-                // Note: Diagonal can also take care these emails if customer email is provided on creation - for instance during the checkout session creation.
+                const customer = await database.customer.findById(
+                    charge.customer_id,
+                )
+
+                await EmailClient.sendInvoicePaymentFailedWallet(
+                    customer.email,
+                    {
+                        charge,
+                    },
+                )
             }
             break
         case 'charge.failed':
@@ -179,7 +190,7 @@ export async function handleDiagonalRequest(
                  * That is: more than 21 days have passed since the first attempt.
                  *
                  * You can either create a new charge, if you want to extend further the window, or mark the invoice
-                 * as uncollectible, as no further attempts will be made to settle the charge.
+                 * as uncollectible and cancel the subscription, as no further attempts will be made to settle the charge.
                  *
                  * Check the dunning flow section for more details
                  * https://docs.diagonal.finance/docs/dunning-flows
@@ -188,11 +199,16 @@ export async function handleDiagonalRequest(
                 // Reference should be defined with the invoice id.
                 if (typeof charge.reference !== 'string') return
 
-                const failureReason = charge.last_attempt_failure_reason
-
                 await stripe.invoices.markUncollectible(charge.reference, {
                     idempotencyKey: 'uncollectible-' + charge.id,
                 })
+
+                await stripe.subscriptions.cancel(charge.reference, {
+                    idempotencyKey: 'cancel-' + charge.id,
+                })
+
+                // No need to send email as the `customer.subscription.deleted` event will be triggered
+                // and then send the email there.
             }
             break
         case 'signature.charge.request':

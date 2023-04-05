@@ -1,8 +1,9 @@
 import { Diagonal } from 'diagonal'
 import { Request, Response } from 'express'
-import { environment } from './environment'
 import Stripe from 'stripe'
 import { database } from '.'
+import { EmailClient } from './email'
+import { environment } from './environment'
 
 export async function handleStripeRequest(
     request: Request,
@@ -39,6 +40,26 @@ export async function handleStripeRequest(
              *
              * Note: this will only happen when the payment happens in fiat.
              */
+            {
+                const invoice = event.data.object as Stripe.Invoice
+                if (!invoice.customer) return
+
+                const customer = await database.customer.findByStripeId(
+                    invoice.customer as string,
+                )
+
+                const paymentMethod = await stripe.paymentMethods.retrieve(
+                    customer.paymentMethodId!,
+                )
+
+                await EmailClient.sendInvoicePaymentSucceededCard(
+                    customer.email,
+                    {
+                        invoice,
+                        paymentMethod,
+                    },
+                )
+            }
             break
         case 'invoice.payment_failed':
             /**
@@ -50,15 +71,44 @@ export async function handleStripeRequest(
              *
              * Note: this will only happen when the payment happens in fiat.
              */
+            {
+                const invoice = event.data.object as Stripe.Invoice
+                if (!invoice.customer) return
+
+                const customer = await database.customer.findByStripeId(
+                    invoice.customer as string,
+                )
+
+                EmailClient.sendInvoicePaymentFailedCard(customer.email, {
+                    invoice,
+                })
+            }
             break
         case 'customer.subscription.deleted':
-            if (event.request !== null) {
-                // The subscription has been canceled by your request
-                return
-            }
+            {
+                const subscription = event.data.object as Stripe.Subscription
+                if (!subscription.customer) return
 
-            // handle subscription cancelled automatically based
-            // upon your subscription settings.
+                const customer = await database.customer.findByStripeId(
+                    subscription.customer as string,
+                )
+
+                const cancellationReason =
+                    subscription.cancellation_details?.reason
+
+                if (
+                    event.request !== null ||
+                    cancellationReason === 'cancellation_requested'
+                ) {
+                    // The subscription has been canceled by your request
+                    EmailClient.sendSubscriptionCanceledUser(customer.email)
+                    return
+                }
+
+                EmailClient.sendSubscriptionCanceledPaymentFailed(
+                    customer.email,
+                )
+            }
             break
         case 'customer.subscription.created':
             {
@@ -74,6 +124,17 @@ export async function handleStripeRequest(
             break
         case 'customer.subscription.trial_will_end':
             // Send notification to your user that the trial will end
+            {
+                const subscription = event.data.object as Stripe.Subscription
+
+                const customer = await database.customer.findByStripeId(
+                    subscription.customer as string,
+                )
+
+                await EmailClient.sendSubscriptionTrialWillEnd(customer.email, {
+                    subscription,
+                })
+            }
             break
         case 'invoice.created':
             {

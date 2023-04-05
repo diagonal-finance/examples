@@ -1,0 +1,9 @@
+Your subscription has been cancelled.
+
+- {{organisation_name}}
+
+------------------------------------
+
+Questions? Please contact {{organisation_email}}.
+
+{{organisation_legal_address}}

@@ -1,0 +1,9 @@
+Your subscription has been cancelled because your wallet ({{chain}}:{{address}}) is blacklisted by USDC.
+
+- {{organisation_name}}
+
+------------------------------------
+
+Questions? Please contact {{organisation_email}}.
+
+{{organisation_legal_address}}
