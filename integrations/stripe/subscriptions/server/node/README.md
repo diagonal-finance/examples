@@ -311,7 +311,7 @@ When handling certain webhook events, you may want to notify your customers abou
 In this example repository, we've provided a fictional email client to illustrate at what point you can notify your customers, along with email templates in the `templates` folder as a starting point to build your own.
 
 The events that you may want to notify your customers about are:
-- **Invoice payment failed**: caused either due to Stripe card payment failing: `invoice.payment_failed`; or Diagonal wallet: `charge.attempt_failed`.
+- **Invoice payment failed**: caused either due to Stripe card payment failing: `invoice.payment_failed`; or Diagonal wallet charge failing: `charge.attempt_failed`.
 	<details>
 		<summary>Example email: Card </summary>
 		<IMG src="./images/emails/invoice-payment-failed-card.png"  alt="Invoice payment failed card"/>
